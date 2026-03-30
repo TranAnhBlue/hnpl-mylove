@@ -725,7 +725,10 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
       baseUrl = window.location.origin;
     }
     
+    // Try both paths - Vercel should handle /love-slideshow
+    // If not, fallback to hash routing
     const specialUrl = `${baseUrl}/love-slideshow`;
+    const fallbackUrl = `${baseUrl}/#/love-slideshow`;
     
     const specialMessage = `
 💕💕💕 THÔNG ĐIỆP YÊU THƯƠNG ĐẶC BIỆT 💕💕💕
