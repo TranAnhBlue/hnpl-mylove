@@ -42,6 +42,10 @@ function App() {
   const [mood, setMood] = useState('❤️');
   const [filterCategory, setFilterCategory] = useState('all');
   const [expandedMemory, setExpandedMemory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState('grid');
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   useEffect(() => {
     fetchMemories();
@@ -51,6 +55,26 @@ function App() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    checkUpcomingEvents();
+  }, [memories]);
+
+  const checkUpcomingEvents = () => {
+    const now = new Date();
+    const upcoming = memories.filter(memory => {
+      const memoryDate = new Date(memory.date);
+      const thisYearDate = new Date(now.getFullYear(), memoryDate.getMonth(), memoryDate.getDate());
+      const daysUntil = Math.ceil((thisYearDate - now) / (1000 * 60 * 60 * 24));
+      return daysUntil >= 0 && daysUntil <= 7;
+    }).map(memory => {
+      const memoryDate = new Date(memory.date);
+      const thisYearDate = new Date(now.getFullYear(), memoryDate.getMonth(), memoryDate.getDate());
+      const daysUntil = Math.ceil((thisYearDate - now) / (1000 * 60 * 60 * 24));
+      return { ...memory, daysUntil };
+    });
+    setUpcomingEvents(upcoming);
+  };
 
   const fetchSettings = async () => {
     try {
@@ -185,6 +209,45 @@ function App() {
     return `${diffDays}d`;
   };
 
+  const getFilteredAndSortedMemories = () => {
+    let filtered = memories.filter(m => {
+      const matchCategory = filterCategory === 'all' || m.category === filterCategory;
+      const matchSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (m.description && m.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchCategory && matchSearch;
+    });
+
+    switch(sortBy) {
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+        break;
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+        break;
+      case 'category':
+        filtered.sort((a, b) => (a.category || 'other').localeCompare(b.category || 'other'));
+        break;
+      default:
+        break;
+    }
+
+    return filtered;
+  };
+
+  const groupByMonth = (memories) => {
+    const groups = {};
+    memories.forEach(memory => {
+      const date = new Date(memory.date);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      const label = format(date, 'MMMM yyyy', { locale: vi });
+      if (!groups[key]) {
+        groups[key] = { label, memories: [] };
+      }
+      groups[key].memories.push(memory);
+    });
+    return Object.values(groups);
+  };
+
   return (
     <div className="app">
       <div className="header">
@@ -208,6 +271,57 @@ function App() {
         </button>
       </div>
 
+      {upcomingEvents.length > 0 && (
+        <div className="upcoming-events">
+          <h3>🔔 Sự kiện sắp tới</h3>
+          <div className="events-list">
+            {upcomingEvents.map(event => (
+              <div key={event._id} className="event-item">
+                <span className="event-icon">{categories.find(c => c.id === event.category)?.icon || '📌'}</span>
+                <span className="event-title">{event.title}</span>
+                <span className="event-countdown">
+                  {event.daysUntil === 0 ? 'Hôm nay!' : `${event.daysUntil} ngày nữa`}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="search-sort-bar">
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="🔍 Tìm kiếm kỷ niệm..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="controls">
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
+            <option value="newest">Mới nhất</option>
+            <option value="oldest">Cũ nhất</option>
+            <option value="category">Theo danh mục</option>
+          </select>
+          <div className="view-toggle">
+            <button 
+              className={viewMode === 'grid' ? 'active' : ''}
+              onClick={() => setViewMode('grid')}
+              title="Xem dạng lưới"
+            >
+              ⊞
+            </button>
+            <button 
+              className={viewMode === 'timeline' ? 'active' : ''}
+              onClick={() => setViewMode('timeline')}
+              title="Xem dạng timeline"
+            >
+              ≡
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div className="category-filter">
         <button 
           className={filterCategory === 'all' ? 'active' : ''}
@@ -226,64 +340,110 @@ function App() {
         ))}
       </div>
 
-      <div className="memories-list">
-        {memories
-          .filter(m => filterCategory === 'all' || m.category === filterCategory)
-          .map((memory, index) => {
+      {viewMode === 'grid' ? (
+        <div className="memories-list">
+          {getFilteredAndSortedMemories().map((memory, index) => {
             const categoryInfo = categories.find(c => c.id === memory.category) || categories[5];
             return (
-          <div 
-            key={memory._id} 
-            className="memory-card"
-            style={{ backgroundColor: categoryInfo.color }}
-          >
-            <div className="time-badge">{getTimeAgo(memory.date)}</div>
-            <div className="category-badge">{categoryInfo.icon}</div>
-            <div className="mood-badge">{memory.mood || '❤️'}</div>
-            {memory.image && (
-              <img 
-                src={`http://localhost:5001${memory.image}`} 
-                alt={memory.title}
-                className="memory-image"
-                onClick={() => setViewImage(`http://localhost:5001${memory.image}`)}
-              />
-            )}
-            <div className="memory-content" onClick={() => handleEdit(memory)}>
-              <h3>{memory.title}</h3>
-              {memory.description && expandedMemory === memory._id && (
-                <p className="memory-description">{memory.description}</p>
-              )}
-              <div className="memory-date">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                  <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
-                </svg>
-                ngày {format(new Date(memory.date), 'dd \'thg\' M, yyyy', { locale: vi })}
-              </div>
-            </div>
-            {memory.description && (
-              <button 
-                className="expand-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExpandedMemory(expandedMemory === memory._id ? null : memory._id);
-                }}
+              <div 
+                key={memory._id} 
+                className="memory-card"
+                style={{ backgroundColor: categoryInfo.color }}
               >
-                {expandedMemory === memory._id ? '▲' : '▼'}
-              </button>
-            )}
-            <button 
-              className="delete-btn"
-              onClick={() => handleDelete(memory._id)}
-            >
-              ×
-            </button>
-          </div>
-        )})}
-      </div>
+                <div className="time-badge">{getTimeAgo(memory.date)}</div>
+                <div className="category-badge">{categoryInfo.icon}</div>
+                <div className="mood-badge">{memory.mood || '❤️'}</div>
+                {memory.image && (
+                  <img 
+                    src={`http://localhost:5001${memory.image}`} 
+                    alt={memory.title}
+                    className="memory-image"
+                    onClick={() => setViewImage(`http://localhost:5001${memory.image}`)}
+                  />
+                )}
+                <div className="memory-content" onClick={() => handleEdit(memory)}>
+                  <h3>{memory.title}</h3>
+                  {memory.description && expandedMemory === memory._id && (
+                    <p className="memory-description">{memory.description}</p>
+                  )}
+                  <div className="memory-date">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"></path>
+                    </svg>
+                    ngày {format(new Date(memory.date), 'dd \'thg\' M, yyyy', { locale: vi })}
+                  </div>
+                </div>
+                {memory.description && (
+                  <button 
+                    className="expand-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedMemory(expandedMemory === memory._id ? null : memory._id);
+                    }}
+                  >
+                    {expandedMemory === memory._id ? '▲' : '▼'}
+                  </button>
+                )}
+                <button 
+                  className="delete-btn"
+                  onClick={() => handleDelete(memory._id)}
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="timeline-view">
+          {groupByMonth(getFilteredAndSortedMemories()).map((group, idx) => (
+            <div key={idx} className="timeline-group">
+              <div className="timeline-month">{group.label}</div>
+              {group.memories.map((memory) => {
+                const categoryInfo = categories.find(c => c.id === memory.category) || categories[5];
+                return (
+                  <div key={memory._id} className="timeline-item">
+                    <div className="timeline-dot" style={{ backgroundColor: categoryInfo.color }}></div>
+                    <div className="timeline-content" style={{ borderLeftColor: categoryInfo.color }}>
+                      <div className="timeline-header">
+                        <span className="timeline-icon">{categoryInfo.icon}</span>
+                        <span className="timeline-mood">{memory.mood || '❤️'}</span>
+                        <span className="timeline-date">
+                          {format(new Date(memory.date), 'dd/MM/yyyy')}
+                        </span>
+                      </div>
+                      {memory.image && (
+                        <img 
+                          src={`http://localhost:5001${memory.image}`} 
+                          alt={memory.title}
+                          className="timeline-image"
+                          onClick={() => setViewImage(`http://localhost:5001${memory.image}`)}
+                        />
+                      )}
+                      <h3 className="timeline-title">{memory.title}</h3>
+                      {memory.description && (
+                        <p className="timeline-description">{memory.description}</p>
+                      )}
+                      <div className="timeline-actions">
+                        <button onClick={() => handleEdit(memory)} className="edit-btn-timeline">
+                          ✏️ Sửa
+                        </button>
+                        <button onClick={() => handleDelete(memory._id)} className="delete-btn-timeline">
+                          🗑️ Xóa
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
 
       <button className="add-btn" onClick={() => setShowModal(true)}>
         +
