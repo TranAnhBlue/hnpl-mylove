@@ -1,33 +1,111 @@
-# Ứng Dụng Checklist Ngày Kỷ Niệm
+# 💕 Ứng Dụng Ngày Kỷ Niệm
 
-Ứng dụng web hoàn chỉnh để lưu trữ và quản lý các kỷ niệm đặc biệt với giao diện đẹp mắt và nhiều tính năng nâng cao.
+Ứng dụng web hoàn chỉnh để lưu trữ và quản lý các kỷ niệm đặc biệt với giao diện đẹp mắt, slideshow 70 ảnh với nhạc nền, và nhiều tính năng nâng cao.
 
-## Công nghệ sử dụng
+## 🚀 Demo & Deploy
+
+- **Local**: http://localhost:3000
+- **Mobile (cùng WiFi)**: http://192.168.0.101:3000
+- **Production**: [Xem hướng dẫn deploy](HUONG-DAN-DEPLOY.md)
+
+## ✨ Tính Năng Đặc Biệt
+
+### 🎬 Slideshow 70 Ảnh
+- 📸 70 ảnh kỷ niệm đẹp
+- 🎵 Nhạc nền "Lễ Đường"
+- 💝 70 lời nhắn tương ứng
+- ✨ Hiệu ứng chuyển cảnh mượt mà
+- 💖 10 trái tim bay
+- 🔊 Điều khiển nhạc
+- ⛶ Chế độ toàn màn hình
+- ◀▶ Điều hướng ảnh
+
+### 📱 QR Code Đặc Biệt
+- 🎬 QR code cho slideshow 70 ảnh
+- 📱 QR code cho từng kỷ niệm
+- 💝 Thông điệp yêu thương
+- 📥 Tải xuống và in
+- 🌐 Hoạt động trên mọi thiết bị
+
+## 🛠️ Công nghệ sử dụng
 
 - Frontend: ReactJS + Vite
 - Backend: Node.js + Express
 - Database: MongoDB
 
-## Cài đặt
+## 📦 Cài đặt
 
-1. Cài đặt MongoDB và chạy MongoDB server
-2. Cài đặt dependencies:
+### Bước 1: Clone repo
+```bash
+git clone https://github.com/your-username/anniversary-app.git
+cd anniversary-app
+```
+
+### Bước 2: Cài đặt dependencies
 ```bash
 npm run install-all
 ```
 
-3. Tạo thư mục uploads cho server:
+### Bước 3: Cấu hình
 ```bash
-mkdir server/uploads
+# Copy file .env.example
+cp server/.env.example server/.env
+
+# Sửa file server/.env với MongoDB URI của bạn
 ```
 
-4. Chạy ứng dụng:
+### Bước 4: Chạy ứng dụng
 ```bash
 npm run dev
 ```
 
 - Frontend: http://localhost:3000
-- Backend: http://localhost:5000
+- Backend: http://localhost:5001
+
+## 📱 Truy Cập Từ Điện Thoại
+
+### Cùng WiFi
+```bash
+# Lấy IP local
+node get-local-ip.js
+
+# Mở trên điện thoại
+http://192.168.0.101:3000
+```
+
+Xem chi tiết: [HUONG-DAN-QUET-QR-TU-DIEN-THOAI.md](HUONG-DAN-QUET-QR-TU-DIEN-THOAI.md)
+
+## 🎵 Thêm Nhạc Nền
+
+1. Tải bài "Lễ Đường Đi"
+2. Đổi tên thành `Lễ Đường.mp3`
+3. Copy vào `client/public/music/`
+
+Xem chi tiết: [HUONG-DAN-THEM-NHAC.md](HUONG-DAN-THEM-NHAC.md)
+
+## 🌐 Deploy Lên Production
+
+### Cách Nhanh (Vercel + Railway)
+
+```bash
+# Deploy frontend lên Vercel
+cd client
+vercel --prod
+
+# Deploy backend lên Railway
+# Xem hướng dẫn chi tiết
+```
+
+Hoặc dùng script tự động:
+```bash
+# Windows
+deploy.bat
+
+# Mac/Linux
+./deploy.sh
+```
+
+Xem chi tiết: [HUONG-DAN-DEPLOY.md](HUONG-DAN-DEPLOY.md)
 
 ## Tính năng
 

@@ -1,7 +1,35 @@
+# Dependencies
 node_modules/
-server/node_modules/
 client/node_modules/
-server/uploads/
-server/.env
+server/node_modules/
+
+# Build
 client/dist/
+client/build/
+
+# Environment
+.env
+.env.local
+.env.production
+server/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Uploads (nếu dùng local storage)
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Vercel
+.vercel

@@ -5,7 +5,7 @@ import { vi } from 'date-fns/locale';
 import QRCode from 'qrcode';
 import './App.css';
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
 const categories = [
   { id: 'date', name: 'Hẹn hò', icon: '💑', color: '#E91E63' },
@@ -708,13 +708,24 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
   };
 
   const generateSpecialQR = async () => {
-    // Lấy IP local thay vì localhost
-    const localIP = window.location.hostname === 'localhost' 
-      ? '192.168.0.101' // IP local của máy bạn
-      : window.location.hostname;
+    // Lấy URL phù hợp với môi trường
+    const isDevelopment = window.location.hostname === 'localhost' || 
+                         window.location.hostname.includes('192.168');
     
-    const port = window.location.port || '3000';
-    const specialUrl = `http://${localIP}:${port}/love-slideshow`;
+    let baseUrl;
+    if (isDevelopment) {
+      // Development: dùng IP local
+      const localIP = window.location.hostname === 'localhost' 
+        ? '192.168.0.101'
+        : window.location.hostname;
+      const port = window.location.port || '3000';
+      baseUrl = `http://${localIP}:${port}`;
+    } else {
+      // Production: dùng domain hiện tại
+      baseUrl = window.location.origin;
+    }
+    
+    const specialUrl = `${baseUrl}/love-slideshow`;
     
     const specialMessage = `
 💕💕💕 THÔNG ĐIỆP YÊU THƯƠNG ĐẶC BIỆT 💕💕💕
