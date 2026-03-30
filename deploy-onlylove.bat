@@ -29,7 +29,7 @@ echo 🌐 Deploying to Vercel...
 echo Project: onlylovehnpl
 echo.
 
-call vercel --prod --name onlylovehnpl
+call vercel --prod --yes
 
 if %errorlevel% neq 0 (
     echo ❌ Deploy thất bại!

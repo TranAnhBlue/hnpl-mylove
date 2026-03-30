@@ -107,9 +107,10 @@ REM Deploy Frontend
 echo [8/8] 🚀 Deploy Frontend lên Vercel...
 echo.
 echo 📍 Domain: onlylovehnpl.vercel.app
+echo 📍 Root Directory: client
 echo.
 cd client
-call vercel --prod --name onlylovehnpl --yes
+call vercel --prod --yes
 if %errorlevel% neq 0 (
     echo ❌ Deploy frontend thất bại
     cd ..
