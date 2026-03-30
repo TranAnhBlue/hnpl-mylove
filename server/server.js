@@ -37,6 +37,8 @@ const memorySchema = new mongoose.Schema({
   description: { type: String, default: '' },
   category: { type: String, default: 'other' },
   mood: { type: String, default: '❤️' },
+  tags: { type: [String], default: [] },
+  favorite: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -98,7 +100,9 @@ app.post('/api/memories', upload.single('image'), async (req, res) => {
       image: req.file ? `/uploads/${req.file.filename}` : null,
       description: req.body.description || '',
       category: req.body.category || 'other',
-      mood: req.body.mood || '❤️'
+      mood: req.body.mood || '❤️',
+      tags: req.body.tags ? JSON.parse(req.body.tags) : [],
+      favorite: req.body.favorite === 'true'
     });
     const newMemory = await memory.save();
     res.status(201).json(newMemory);
@@ -114,7 +118,9 @@ app.put('/api/memories/:id', upload.single('image'), async (req, res) => {
       date: req.body.date,
       description: req.body.description || '',
       category: req.body.category || 'other',
-      mood: req.body.mood || '❤️'
+      mood: req.body.mood || '❤️',
+      tags: req.body.tags ? (typeof req.body.tags === 'string' ? JSON.parse(req.body.tags) : req.body.tags) : [],
+      favorite: req.body.favorite === 'true' || req.body.favorite === true
     };
     if (req.file) {
       updateData.image = `/uploads/${req.file.filename}`;

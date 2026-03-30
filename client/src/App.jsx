@@ -46,10 +46,39 @@ function App() {
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
   const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [showStats, setShowStats] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [showAdvancedFilter, setShowAdvancedFilter] = useState(false);
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [filterMood, setFilterMood] = useState('all');
+  const [filterHasImage, setFilterHasImage] = useState('all');
+  const [showQuickNote, setShowQuickNote] = useState(false);
+  const [quickNoteText, setQuickNoteText] = useState('');
+  const [tags, setTags] = useState([]);
+  const [currentTags, setCurrentTags] = useState([]);
+  const [filterTag, setFilterTag] = useState('all');
+  const [showGallery, setShowGallery] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [selectedMemories, setSelectedMemories] = useState([]);
+  const [bulkEditMode, setBulkEditMode] = useState(false);
+  const [showWidget, setShowWidget] = useState(true);
+  const [randomMemory, setRandomMemory] = useState(null);
+  const [countdowns, setCountdowns] = useState([]);
+  const [showCountdownModal, setShowCountdownModal] = useState(false);
+  const [newCountdown, setNewCountdown] = useState({ title: '', date: '' });
+  const [savedFilters, setSavedFilters] = useState([]);
+  const [filterName, setFilterName] = useState('');
+  const [showFavorites, setShowFavorites] = useState(false);
 
   useEffect(() => {
     fetchMemories();
     fetchSettings();
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(savedDarkMode);
+    const savedCountdowns = JSON.parse(localStorage.getItem('countdowns') || '[]');
+    setCountdowns(savedCountdowns);
+    const savedFiltersData = JSON.parse(localStorage.getItem('savedFilters') || '[]');
+    setSavedFilters(savedFiltersData);
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -58,7 +87,22 @@ function App() {
 
   useEffect(() => {
     checkUpcomingEvents();
+    updateRandomMemory();
+    extractAllTags();
   }, [memories]);
+
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', darkMode);
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('countdowns', JSON.stringify(countdowns));
+  }, [countdowns]);
+
+  useEffect(() => {
+    localStorage.setItem('savedFilters', JSON.stringify(savedFilters));
+  }, [savedFilters]);
 
   const checkUpcomingEvents = () => {
     const now = new Date();
@@ -130,6 +174,8 @@ function App() {
     formData.append('description', description);
     formData.append('category', category);
     formData.append('mood', mood);
+    formData.append('tags', JSON.stringify(currentTags));
+    formData.append('favorite', 'false');
     if (image) formData.append('image', image);
 
     try {
@@ -143,6 +189,7 @@ function App() {
       setDescription('');
       setCategory('other');
       setMood('❤️');
+      setCurrentTags([]);
       setImage(null);
       setImagePreview(null);
       setShowModal(false);
@@ -160,6 +207,7 @@ function App() {
     setDescription(memory.description || '');
     setCategory(memory.category || 'other');
     setMood(memory.mood || '❤️');
+    setCurrentTags(memory.tags || []);
     setImagePreview(memory.image ? `http://localhost:5001${memory.image}` : null);
     setShowModal(true);
   };
@@ -172,6 +220,7 @@ function App() {
     setDescription('');
     setCategory('other');
     setMood('❤️');
+    setCurrentTags([]);
     setImage(null);
     setImagePreview(null);
   };
@@ -214,7 +263,24 @@ function App() {
       const matchCategory = filterCategory === 'all' || m.category === filterCategory;
       const matchSearch = m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (m.description && m.description.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchCategory && matchSearch;
+      
+      // Advanced filters
+      const matchMood = filterMood === 'all' || m.mood === filterMood;
+      const matchImage = filterHasImage === 'all' || 
+                        (filterHasImage === 'with' && m.image) ||
+                        (filterHasImage === 'without' && !m.image);
+      
+      const matchTag = filterTag === 'all' || (m.tags && m.tags.includes(filterTag));
+      const matchFavorite = !showFavorites || m.favorite;
+      
+      let matchDateRange = true;
+      if (dateRange.start || dateRange.end) {
+        const memDate = new Date(m.date);
+        if (dateRange.start) matchDateRange = matchDateRange && memDate >= new Date(dateRange.start);
+        if (dateRange.end) matchDateRange = matchDateRange && memDate <= new Date(dateRange.end);
+      }
+      
+      return matchCategory && matchSearch && matchMood && matchImage && matchDateRange && matchTag && matchFavorite;
     });
 
     switch(sortBy) {
@@ -248,6 +314,255 @@ function App() {
     return Object.values(groups);
   };
 
+  const getStats = () => {
+    const total = memories.length;
+    const withImages = memories.filter(m => m.image).length;
+    const categoryStats = {};
+    categories.forEach(cat => {
+      categoryStats[cat.id] = memories.filter(m => m.category === cat.id).length;
+    });
+    const mostUsedCategory = Object.keys(categoryStats).reduce((a, b) => 
+      categoryStats[a] > categoryStats[b] ? a : b, 'other'
+    );
+    const recentMemories = [...memories].sort((a, b) => 
+      new Date(b.createdAt) - new Date(a.createdAt)
+    ).slice(0, 5);
+    
+    return { total, withImages, categoryStats, mostUsedCategory, recentMemories };
+  };
+
+  const handleExport = () => {
+    const dataStr = JSON.stringify(memories, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `memories-backup-${format(new Date(), 'yyyy-MM-dd')}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+          // Import each memory
+          for (const memory of importedData) {
+            await axios.post(`${API_URL}/memories`, {
+              title: memory.title,
+              date: memory.date,
+              description: memory.description,
+              category: memory.category,
+              mood: memory.mood
+            });
+          }
+          fetchMemories();
+          alert('Import thành công!');
+        } catch (error) {
+          console.error('Error importing:', error);
+          alert('Lỗi khi import dữ liệu!');
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleQuickNote = async () => {
+    if (!quickNoteText.trim()) return;
+    
+    try {
+      await axios.post(`${API_URL}/memories`, {
+        title: quickNoteText,
+        date: new Date().toISOString(),
+        description: '',
+        category: 'other',
+        mood: '❤️'
+      });
+      setQuickNoteText('');
+      setShowQuickNote(false);
+      fetchMemories();
+    } catch (error) {
+      console.error('Error saving quick note:', error);
+    }
+  };
+
+  const shareMemory = (memory) => {
+    const text = `${memory.title}\n${format(new Date(memory.date), 'dd/MM/yyyy')}`;
+    if (navigator.share) {
+      navigator.share({
+        title: memory.title,
+        text: text,
+      }).catch(err => console.log('Error sharing:', err));
+    } else {
+      navigator.clipboard.writeText(text);
+      alert('Đã copy vào clipboard!');
+    }
+  };
+
+  const extractAllTags = () => {
+    const allTags = new Set();
+    memories.forEach(m => {
+      if (m.tags && Array.isArray(m.tags)) {
+        m.tags.forEach(tag => allTags.add(tag));
+      }
+    });
+    setTags(Array.from(allTags));
+  };
+
+  const addTag = (tag) => {
+    if (tag && !currentTags.includes(tag)) {
+      setCurrentTags([...currentTags, tag]);
+    }
+  };
+
+  const removeTag = (tag) => {
+    setCurrentTags(currentTags.filter(t => t !== tag));
+  };
+
+  const toggleFavorite = async (memoryId) => {
+    try {
+      const memory = memories.find(m => m._id === memoryId);
+      await axios.put(`${API_URL}/memories/${memoryId}`, {
+        ...memory,
+        favorite: !memory.favorite
+      });
+      fetchMemories();
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
+  const updateRandomMemory = () => {
+    if (memories.length > 0) {
+      const random = memories[Math.floor(Math.random() * memories.length)];
+      setRandomMemory(random);
+    }
+  };
+
+  const getMemoryFromThisDay = () => {
+    const today = new Date();
+    const thisDay = memories.filter(m => {
+      const mDate = new Date(m.date);
+      return mDate.getDate() === today.getDate() && 
+             mDate.getMonth() === today.getMonth() &&
+             mDate.getFullYear() !== today.getFullYear();
+    });
+    return thisDay.length > 0 ? thisDay[0] : null;
+  };
+
+  const addCountdown = () => {
+    if (newCountdown.title && newCountdown.date) {
+      setCountdowns([...countdowns, { ...newCountdown, id: Date.now() }]);
+      setNewCountdown({ title: '', date: '' });
+      setShowCountdownModal(false);
+    }
+  };
+
+  const deleteCountdown = (id) => {
+    setCountdowns(countdowns.filter(c => c.id !== id));
+  };
+
+  const getDaysUntil = (date) => {
+    const now = new Date();
+    const target = new Date(date);
+    const diffTime = target - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const toggleSelectMemory = (memoryId) => {
+    if (selectedMemories.includes(memoryId)) {
+      setSelectedMemories(selectedMemories.filter(id => id !== memoryId));
+    } else {
+      setSelectedMemories([...selectedMemories, memoryId]);
+    }
+  };
+
+  const bulkDelete = async () => {
+    if (window.confirm(`Xóa ${selectedMemories.length} kỷ niệm?`)) {
+      try {
+        for (const id of selectedMemories) {
+          await axios.delete(`${API_URL}/memories/${id}`);
+        }
+        setSelectedMemories([]);
+        setBulkEditMode(false);
+        fetchMemories();
+      } catch (error) {
+        console.error('Error bulk deleting:', error);
+      }
+    }
+  };
+
+  const bulkChangeCategory = async (newCategory) => {
+    try {
+      for (const id of selectedMemories) {
+        const memory = memories.find(m => m._id === id);
+        await axios.put(`${API_URL}/memories/${id}`, {
+          ...memory,
+          category: newCategory
+        });
+      }
+      setSelectedMemories([]);
+      setBulkEditMode(false);
+      fetchMemories();
+    } catch (error) {
+      console.error('Error bulk updating:', error);
+    }
+  };
+
+  const bulkExport = () => {
+    const selected = memories.filter(m => selectedMemories.includes(m._id));
+    const dataStr = JSON.stringify(selected, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `selected-memories-${format(new Date(), 'yyyy-MM-dd')}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const saveCurrentFilter = () => {
+    if (filterName) {
+      const filter = {
+        name: filterName,
+        category: filterCategory,
+        searchQuery,
+        sortBy,
+        dateRange,
+        filterMood,
+        filterHasImage,
+        filterTag
+      };
+      setSavedFilters([...savedFilters, filter]);
+      setFilterName('');
+    }
+  };
+
+  const loadFilter = (filter) => {
+    setFilterCategory(filter.category);
+    setSearchQuery(filter.searchQuery);
+    setSortBy(filter.sortBy);
+    setDateRange(filter.dateRange);
+    setFilterMood(filter.filterMood);
+    setFilterHasImage(filter.filterHasImage);
+    setFilterTag(filter.filterTag);
+  };
+
+  const deleteFilter = (index) => {
+    setSavedFilters(savedFilters.filter((_, i) => i !== index));
+  };
+
+  const getGalleryImages = () => {
+    return memories.filter(m => m.image).map(m => ({
+      ...m,
+      imageUrl: `http://localhost:5001${m.image}`
+    }));
+  };
+
   return (
     <div className="app">
       <div className="header">
@@ -266,12 +581,85 @@ function App() {
             )}
           </div>
         )}
-        <button className="settings-btn" onClick={() => setShowSettings(true)}>
-          ⚙️
-        </button>
+        <div className="header-actions">
+          <button className="icon-btn" onClick={() => setShowFavorites(!showFavorites)} title="Yêu thích">
+            {showFavorites ? '⭐' : '☆'}
+          </button>
+          <button className="icon-btn" onClick={() => setDarkMode(!darkMode)} title="Chế độ tối">
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+          <button className="icon-btn" onClick={() => setShowStats(true)} title="Thống kê">
+            📊
+          </button>
+          <button className="icon-btn" onClick={() => setShowSettings(true)} title="Cài đặt">
+            ⚙️
+          </button>
+        </div>
       </div>
 
-      {upcomingEvents.length > 0 && (
+      {showWidget && randomMemory && (
+        <div className="widget-container">
+          <button className="widget-close" onClick={() => setShowWidget(false)}>×</button>
+          <div className="widget-content">
+            <div className="widget-icon">💭</div>
+            <div className="widget-title">Kỷ niệm ngẫu nhiên</div>
+            <div className="widget-memory">{randomMemory.title}</div>
+            <div className="widget-date">
+              {format(new Date(randomMemory.date), 'dd/MM/yyyy')}
+            </div>
+            <button className="widget-refresh" onClick={updateRandomMemory}>🔄</button>
+          </div>
+          {getMemoryFromThisDay() && (
+            <div className="widget-thisday">
+              <div className="widget-icon">📅</div>
+              <div className="widget-title">Ngày này năm trước</div>
+              <div className="widget-memory">{getMemoryFromThisDay().title}</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {countdowns.length === 0 && upcomingEvents.length === 0 ? null : (
+        <div className="notifications-section">
+          {countdowns.length > 0 && (
+            <div className="countdowns-compact">
+              <span className="section-label">⏰ Countdown:</span>
+              {countdowns.slice(0, 2).map(cd => {
+                const days = getDaysUntil(cd.date);
+                return (
+                  <div key={cd.id} className="countdown-item-compact">
+                    <span>{cd.title}</span>
+                    <span className="countdown-days">
+                      {days > 0 ? `${days}d` : days === 0 ? 'Hôm nay!' : 'Qua'}
+                    </span>
+                  </div>
+                );
+              })}
+              {countdowns.length > 2 && (
+                <button className="see-more-btn" onClick={() => setShowCountdownModal(true)}>
+                  +{countdowns.length - 2}
+                </button>
+              )}
+            </div>
+          )}
+
+          {upcomingEvents.length > 0 && (
+            <div className="upcoming-compact">
+              <span className="section-label">🔔 Sắp tới:</span>
+              {upcomingEvents.slice(0, 2).map(event => (
+                <div key={event._id} className="event-item-compact">
+                  <span>{event.title}</span>
+                  <span className="event-countdown">
+                    {event.daysUntil === 0 ? 'Hôm nay!' : `${event.daysUntil}d`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {upcomingEvents.length > 0 && false && (
         <div className="upcoming-events">
           <h3>🔔 Sự kiện sắp tới</h3>
           <div className="events-list">
@@ -288,39 +676,154 @@ function App() {
         </div>
       )}
 
-      <div className="search-sort-bar">
+      <div className="controls-bar">
         <div className="search-box">
           <input
             type="text"
-            placeholder="🔍 Tìm kiếm kỷ niệm..."
+            placeholder="🔍 Tìm kiếm..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="controls">
+        <div className="controls-group">
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
             <option value="newest">Mới nhất</option>
             <option value="oldest">Cũ nhất</option>
-            <option value="category">Theo danh mục</option>
+            <option value="category">Danh mục</option>
           </select>
+          <button 
+            className={`control-btn ${showAdvancedFilter ? 'active' : ''}`}
+            onClick={() => setShowAdvancedFilter(!showAdvancedFilter)}
+            title="Bộ lọc"
+          >
+            🔧
+          </button>
+          <button 
+            className={`control-btn ${bulkEditMode ? 'active' : ''}`}
+            onClick={() => setBulkEditMode(!bulkEditMode)}
+            title="Chọn nhiều"
+          >
+            {bulkEditMode ? '✓' : '☐'}
+          </button>
+          <button 
+            className="control-btn"
+            onClick={() => setShowGallery(true)}
+            title="Gallery"
+          >
+            🖼️
+          </button>
           <div className="view-toggle">
             <button 
               className={viewMode === 'grid' ? 'active' : ''}
               onClick={() => setViewMode('grid')}
-              title="Xem dạng lưới"
             >
               ⊞
             </button>
             <button 
               className={viewMode === 'timeline' ? 'active' : ''}
               onClick={() => setViewMode('timeline')}
-              title="Xem dạng timeline"
             >
               ≡
             </button>
           </div>
         </div>
+        
+        {showAdvancedFilter && (
+          <div className="advanced-filter">
+            <div className="filter-grid">
+              <div className="filter-item">
+                <label>Từ:</label>
+                <input 
+                  type="date" 
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                />
+              </div>
+              <div className="filter-item">
+                <label>Đến:</label>
+                <input 
+                  type="date" 
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                />
+              </div>
+              <div className="filter-item">
+                <label>Cảm xúc:</label>
+                <select value={filterMood} onChange={(e) => setFilterMood(e.target.value)}>
+                  <option value="all">Tất cả</option>
+                  {moods.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div className="filter-item">
+                <label>Ảnh:</label>
+                <select value={filterHasImage} onChange={(e) => setFilterHasImage(e.target.value)}>
+                  <option value="all">Tất cả</option>
+                  <option value="with">Có</option>
+                  <option value="without">Không</option>
+                </select>
+              </div>
+              {tags.length > 0 && (
+                <div className="filter-item">
+                  <label>Tags:</label>
+                  <select value={filterTag} onChange={(e) => setFilterTag(e.target.value)}>
+                    <option value="all">Tất cả</option>
+                    {tags.map(tag => <option key={tag} value={tag}>{tag}</option>)}
+                  </select>
+                </div>
+              )}
+            </div>
+            <div className="filter-actions">
+              <button 
+                className="clear-filter-btn"
+                onClick={() => {
+                  setDateRange({ start: '', end: '' });
+                  setFilterMood('all');
+                  setFilterHasImage('all');
+                  setFilterTag('all');
+                }}
+              >
+                Xóa
+              </button>
+              {savedFilters.length > 0 && (
+                <select onChange={(e) => e.target.value && loadFilter(JSON.parse(e.target.value))} defaultValue="">
+                  <option value="">Bộ lọc đã lưu</option>
+                  {savedFilters.map((filter, idx) => (
+                    <option key={idx} value={JSON.stringify(filter)}>{filter.name}</option>
+                  ))}
+                </select>
+              )}
+              <input 
+                type="text" 
+                placeholder="Tên bộ lọc..."
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                style={{flex: 1, minWidth: '100px'}}
+              />
+              <button className="save-filter-btn" onClick={saveCurrentFilter}>
+                💾
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {bulkEditMode && selectedMemories.length > 0 && (
+        <div className="bulk-actions-bar">
+          <span>{selectedMemories.length} đã chọn</span>
+          <select onChange={(e) => e.target.value && bulkChangeCategory(e.target.value)} defaultValue="">
+            <option value="">Đổi danh mục</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+            ))}
+          </select>
+          <button onClick={bulkExport}>📥 Xuất</button>
+          <button onClick={bulkDelete} className="bulk-delete">🗑️ Xóa</button>
+          <button onClick={() => {
+            setSelectedMemories([]);
+            setBulkEditMode(false);
+          }}>Hủy</button>
+        </div>
+      )}
 
       <div className="category-filter">
         <button 
@@ -350,6 +853,23 @@ function App() {
                 className="memory-card"
                 style={{ backgroundColor: categoryInfo.color }}
               >
+                {bulkEditMode && (
+                  <input 
+                    type="checkbox"
+                    className="memory-checkbox"
+                    checked={selectedMemories.includes(memory._id)}
+                    onChange={() => toggleSelectMemory(memory._id)}
+                  />
+                )}
+                <button 
+                  className="favorite-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(memory._id);
+                  }}
+                >
+                  {memory.favorite ? '⭐' : '☆'}
+                </button>
                 <div className="time-badge">{getTimeAgo(memory.date)}</div>
                 <div className="category-badge">{categoryInfo.icon}</div>
                 <div className="mood-badge">{memory.mood || '❤️'}</div>
@@ -363,6 +883,13 @@ function App() {
                 )}
                 <div className="memory-content" onClick={() => handleEdit(memory)}>
                   <h3>{memory.title}</h3>
+                  {memory.tags && memory.tags.length > 0 && (
+                    <div className="memory-tags">
+                      {memory.tags.map(tag => (
+                        <span key={tag} className="memory-tag">{tag}</span>
+                      ))}
+                    </div>
+                  )}
                   {memory.description && expandedMemory === memory._id && (
                     <p className="memory-description">{memory.description}</p>
                   )}
@@ -388,6 +915,16 @@ function App() {
                     {expandedMemory === memory._id ? '▲' : '▼'}
                   </button>
                 )}
+                <button 
+                  className="share-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    shareMemory(memory);
+                  }}
+                  title="Chia sẻ"
+                >
+                  📤
+                </button>
                 <button 
                   className="delete-btn"
                   onClick={() => handleDelete(memory._id)}
@@ -432,6 +969,9 @@ function App() {
                         <button onClick={() => handleEdit(memory)} className="edit-btn-timeline">
                           ✏️ Sửa
                         </button>
+                        <button onClick={() => shareMemory(memory)} className="share-btn-timeline">
+                          📤 Chia sẻ
+                        </button>
                         <button onClick={() => handleDelete(memory._id)} className="delete-btn-timeline">
                           🗑️ Xóa
                         </button>
@@ -445,9 +985,20 @@ function App() {
         </div>
       )}
 
-      <button className="add-btn" onClick={() => setShowModal(true)}>
-        +
-      </button>
+      <div className="floating-actions">
+        <button className="action-btn quick-note-btn" onClick={() => setShowQuickNote(true)} title="Ghi chú nhanh">
+          📝
+        </button>
+        <button className="action-btn widget-btn" onClick={() => setShowWidget(!showWidget)} title="Widget">
+          💭
+        </button>
+        <button className="action-btn countdown-btn" onClick={() => setShowCountdownModal(true)} title="Countdown">
+          ⏰
+        </button>
+        <button className="action-btn add-btn" onClick={() => setShowModal(true)}>
+          +
+        </button>
+      </div>
 
       {showModal && (
         <div className="modal">
@@ -536,6 +1087,119 @@ function App() {
                 ))}
               </div>
             </div>
+
+            <div className="form-group">
+              <label>Tags</label>
+              <div className="tags-input-container">
+                <div className="current-tags">
+                  {currentTags.map(tag => (
+                    <span key={tag} className="tag-item">
+                      {tag}
+                      <button type="button" onClick={() => removeTag(tag)}>×</button>
+                    </span>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  placeholder="Thêm tag..."
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addTag(e.target.value);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+                {tags.length > 0 && (
+                  <div className="tag-suggestions">
+                    {tags.filter(t => !currentTags.includes(t)).slice(0, 5).map(tag => (
+                      <button key={tag} type="button" onClick={() => addTag(tag)}>
+                        + {tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showGallery && (
+        <div className="gallery-modal">
+          <div className="gallery-header">
+            <button onClick={() => setShowGallery(false)}>← Đóng</button>
+            <span>{galleryIndex + 1} / {getGalleryImages().length}</span>
+          </div>
+          <div className="gallery-content">
+            {getGalleryImages().length > 0 ? (
+              <>
+                <button 
+                  className="gallery-nav prev"
+                  onClick={() => setGalleryIndex(Math.max(0, galleryIndex - 1))}
+                  disabled={galleryIndex === 0}
+                >
+                  ‹
+                </button>
+                <div className="gallery-image-container">
+                  <img 
+                    src={getGalleryImages()[galleryIndex]?.imageUrl} 
+                    alt={getGalleryImages()[galleryIndex]?.title}
+                  />
+                  <div className="gallery-info">
+                    <h3>{getGalleryImages()[galleryIndex]?.title}</h3>
+                    <p>{format(new Date(getGalleryImages()[galleryIndex]?.date), 'dd/MM/yyyy')}</p>
+                  </div>
+                </div>
+                <button 
+                  className="gallery-nav next"
+                  onClick={() => setGalleryIndex(Math.min(getGalleryImages().length - 1, galleryIndex + 1))}
+                  disabled={galleryIndex === getGalleryImages().length - 1}
+                >
+                  ›
+                </button>
+              </>
+            ) : (
+              <div className="gallery-empty">Không có ảnh nào</div>
+            )}
+          </div>
+          <div className="gallery-thumbnails">
+            {getGalleryImages().map((img, idx) => (
+              <img
+                key={idx}
+                src={img.imageUrl}
+                alt={img.title}
+                className={idx === galleryIndex ? 'active' : ''}
+                onClick={() => setGalleryIndex(idx)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {showCountdownModal && (
+        <div className="quick-note-modal">
+          <div className="quick-note-content">
+            <h3>⏰ Thêm Countdown</h3>
+            <input
+              type="text"
+              placeholder="Tên sự kiện..."
+              value={newCountdown.title}
+              onChange={(e) => setNewCountdown({...newCountdown, title: e.target.value})}
+            />
+            <input
+              type="date"
+              value={newCountdown.date}
+              onChange={(e) => setNewCountdown({...newCountdown, date: e.target.value})}
+            />
+            <div className="quick-note-actions">
+              <button onClick={() => setShowCountdownModal(false)} className="cancel-btn">
+                Hủy
+              </button>
+              <button onClick={addCountdown} className="save-btn">
+                Thêm
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -591,6 +1255,119 @@ function App() {
                 value={coupleName2}
                 onChange={(e) => setCoupleName2(e.target.value)}
               />
+            </div>
+
+            <div className="settings-section">
+              <h3>Sao lưu & Khôi phục</h3>
+              <button className="action-btn export-btn" onClick={handleExport}>
+                📥 Xuất dữ liệu
+              </button>
+              <label className="action-btn import-btn">
+                📤 Nhập dữ liệu
+                <input type="file" accept=".json" onChange={handleImport} style={{display: 'none'}} />
+              </label>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStats && (
+        <div className="modal">
+          <div className="modal-header">
+            <button className="back-btn" onClick={() => setShowStats(false)}>
+              ← Quay lại
+            </button>
+            <h2>Thống kê</h2>
+            <div style={{width: '60px'}}></div>
+          </div>
+          
+          <div className="modal-content stats-content">
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon">📝</div>
+                <div className="stat-value">{getStats().total}</div>
+                <div className="stat-label">Tổng kỷ niệm</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">📷</div>
+                <div className="stat-value">{getStats().withImages}</div>
+                <div className="stat-label">Có hình ảnh</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">
+                  {categories.find(c => c.id === getStats().mostUsedCategory)?.icon || '📌'}
+                </div>
+                <div className="stat-value">
+                  {getStats().categoryStats[getStats().mostUsedCategory] || 0}
+                </div>
+                <div className="stat-label">Danh mục yêu thích</div>
+              </div>
+            </div>
+
+            <div className="chart-section">
+              <h3>Kỷ niệm theo danh mục</h3>
+              <div className="chart-bars">
+                {categories.map(cat => {
+                  const count = getStats().categoryStats[cat.id] || 0;
+                  const percentage = getStats().total > 0 ? (count / getStats().total) * 100 : 0;
+                  return (
+                    <div key={cat.id} className="chart-bar-item">
+                      <div className="chart-label">
+                        <span>{cat.icon} {cat.name}</span>
+                        <span>{count}</span>
+                      </div>
+                      <div className="chart-bar-bg">
+                        <div 
+                          className="chart-bar-fill" 
+                          style={{width: `${percentage}%`, backgroundColor: cat.color}}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="recent-section">
+              <h3>Kỷ niệm gần đây</h3>
+              <div className="recent-list">
+                {getStats().recentMemories.map(memory => (
+                  <div key={memory._id} className="recent-item" onClick={() => {
+                    setShowStats(false);
+                    handleEdit(memory);
+                  }}>
+                    <span className="recent-icon">
+                      {categories.find(c => c.id === memory.category)?.icon || '📌'}
+                    </span>
+                    <span className="recent-title">{memory.title}</span>
+                    <span className="recent-date">
+                      {format(new Date(memory.date), 'dd/MM/yyyy')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showQuickNote && (
+        <div className="quick-note-modal">
+          <div className="quick-note-content">
+            <h3>✍️ Ghi chú nhanh</h3>
+            <textarea
+              placeholder="Viết ghi chú ngắn về khoảnh khắc này..."
+              value={quickNoteText}
+              onChange={(e) => setQuickNoteText(e.target.value)}
+              autoFocus
+            />
+            <div className="quick-note-actions">
+              <button onClick={() => setShowQuickNote(false)} className="cancel-btn">
+                Hủy
+              </button>
+              <button onClick={handleQuickNote} className="save-btn">
+                Lưu
+              </button>
             </div>
           </div>
         </div>
