@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import QRCode from 'qrcode';
 import './App.css';
 
 const API_URL = 'http://localhost:5001/api';
@@ -69,6 +70,12 @@ function App() {
   const [savedFilters, setSavedFilters] = useState([]);
   const [filterName, setFilterName] = useState('');
   const [showFavorites, setShowFavorites] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrMemory, setQrMemory] = useState(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [showSpecialQR, setShowSpecialQR] = useState(false);
+  const [specialQRUrl, setSpecialQRUrl] = useState('');
+  const [isPlayingMusic, setIsPlayingMusic] = useState(false);
 
   useEffect(() => {
     fetchMemories();
@@ -563,6 +570,191 @@ function App() {
     }));
   };
 
+  const generateQRCode = async (memory) => {
+    setQrMemory(memory);
+    
+    // Tạo URL để xem kỷ niệm (có thể share)
+    const memoryUrl = `${window.location.origin}/memory/${memory._id}`;
+    
+    // Tạo nội dung đáng yêu cho QR code
+    const loveMessage = `
+💕 Kỷ Niệm Đáng Yêu 💕
+
+${memory.title}
+
+📅 Ngày: ${format(new Date(memory.date), 'dd/MM/yyyy')}
+${memory.mood || '❤️'} ${categories.find(c => c.id === memory.category)?.name || 'Kỷ niệm'}
+
+${memory.description ? `💭 "${memory.description}"` : ''}
+
+${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : ''}
+
+⏰ Đã ${getTimeAgo(memory.date)} trôi qua...
+
+💝 Được tạo với yêu thương từ ứng dụng Ngày Kỷ Niệm
+
+🔗 Xem chi tiết: ${memoryUrl}
+    `.trim();
+
+    try {
+      const qrUrl = await QRCode.toDataURL(loveMessage, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#E91E63',
+          light: '#FFFFFF'
+        },
+        errorCorrectionLevel: 'H'
+      });
+      setQrCodeUrl(qrUrl);
+      setShowQRModal(true);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+  };
+
+  const downloadQRCode = () => {
+    const link = document.createElement('a');
+    link.href = qrCodeUrl;
+    link.download = `qr-${qrMemory.title.replace(/\s+/g, '-')}.png`;
+    link.click();
+  };
+
+  const printQRCode = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>In Mã QR - ${qrMemory.title}</title>
+          <style>
+            body {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              margin: 0;
+              font-family: Arial, sans-serif;
+              background: white;
+            }
+            .print-container {
+              text-align: center;
+              padding: 40px;
+              max-width: 600px;
+            }
+            h1 {
+              color: #E91E63;
+              margin-bottom: 10px;
+              font-size: 28px;
+            }
+            .subtitle {
+              color: #666;
+              margin-bottom: 30px;
+              font-size: 16px;
+            }
+            img {
+              width: 300px;
+              height: 300px;
+              margin: 20px 0;
+              border: 4px solid #E91E63;
+              border-radius: 20px;
+              padding: 10px;
+            }
+            .info {
+              margin-top: 20px;
+              padding: 20px;
+              background: #FFE5EC;
+              border-radius: 15px;
+            }
+            .date {
+              color: #666;
+              font-size: 14px;
+              margin-top: 10px;
+            }
+            .footer {
+              margin-top: 30px;
+              color: #999;
+              font-size: 12px;
+            }
+            @media print {
+              body { margin: 0; }
+              .print-container { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-container">
+            <h1>💕 ${qrMemory.title}</h1>
+            <div class="subtitle">Quét mã QR để xem kỷ niệm đáng yêu</div>
+            <img src="${qrCodeUrl}" alt="QR Code" />
+            <div class="info">
+              <div style="font-size: 18px; font-weight: bold; color: #E91E63;">
+                ${categories.find(c => c.id === qrMemory.category)?.icon || '📌'} 
+                ${categories.find(c => c.id === qrMemory.category)?.name || 'Kỷ niệm'}
+              </div>
+              <div class="date">📅 ${format(new Date(qrMemory.date), 'dd/MM/yyyy')}</div>
+            </div>
+            <div class="footer">
+              💝 Được tạo từ ứng dụng Ngày Kỷ Niệm
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  };
+
+  const generateSpecialQR = async () => {
+    // Lấy IP local thay vì localhost
+    const localIP = window.location.hostname === 'localhost' 
+      ? '192.168.0.101' // IP local của máy bạn
+      : window.location.hostname;
+    
+    const port = window.location.port || '3000';
+    const specialUrl = `http://${localIP}:${port}/love-slideshow`;
+    
+    const specialMessage = `
+💕💕💕 THÔNG ĐIỆP YÊU THƯƠNG ĐẶC BIỆT 💕💕💕
+
+🎵 Quét mã QR này để xem slideshow ảnh đẹp với nhạc "Lễ Đường" lãng mạn!
+
+✨ 70 khoảnh khắc đáng nhớ
+🎶 Nhạc nền "Lễ Đường"
+💝 Hiệu ứng chuyển cảnh mượt mà
+🌟 Được tạo với tất cả tình yêu
+
+🔗 ${specialUrl}
+
+💌 Dành tặng người đặc biệt nhất
+    `.trim();
+
+    try {
+      const qrUrl = await QRCode.toDataURL(specialMessage, {
+        width: 350,
+        margin: 2,
+        color: {
+          dark: '#E91E63',
+          light: '#FFFFFF'
+        },
+        errorCorrectionLevel: 'H'
+      });
+      setSpecialQRUrl(qrUrl);
+      setShowSpecialQR(true);
+    } catch (error) {
+      console.error('Error generating special QR:', error);
+    }
+  };
+
+  const downloadSpecialQR = () => {
+    const link = document.createElement('a');
+    link.href = specialQRUrl;
+    link.download = 'qr-love-slideshow-special.png';
+    link.click();
+  };
+
   return (
     <div className="app">
       <div className="header">
@@ -582,6 +774,9 @@ function App() {
           </div>
         )}
         <div className="header-actions">
+          <button className="icon-btn special-qr-btn" onClick={generateSpecialQR} title="QR Slideshow Đặc Biệt">
+            🎬
+          </button>
           <button className="icon-btn" onClick={() => setShowFavorites(!showFavorites)} title="Yêu thích">
             {showFavorites ? '⭐' : '☆'}
           </button>
@@ -926,6 +1121,16 @@ function App() {
                   📤
                 </button>
                 <button 
+                  className="qr-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    generateQRCode(memory);
+                  }}
+                  title="Tạo mã QR"
+                >
+                  📱
+                </button>
+                <button 
                   className="delete-btn"
                   onClick={() => handleDelete(memory._id)}
                 >
@@ -969,11 +1174,14 @@ function App() {
                         <button onClick={() => handleEdit(memory)} className="edit-btn-timeline">
                           ✏️ Sửa
                         </button>
+                        <button onClick={() => generateQRCode(memory)} className="qr-btn-timeline">
+                          � QR Code
+                        </button>
                         <button onClick={() => shareMemory(memory)} className="share-btn-timeline">
-                          📤 Chia sẻ
+                          � Chia sẻ
                         </button>
                         <button onClick={() => handleDelete(memory._id)} className="delete-btn-timeline">
-                          🗑️ Xóa
+                          �🗑️ Xóa
                         </button>
                       </div>
                     </div>
@@ -1204,6 +1412,85 @@ function App() {
         </div>
       )}
 
+      {showQRModal && qrMemory && (
+        <div className="qr-modal" onClick={() => setShowQRModal(false)}>
+          <div className="qr-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="qr-close-btn" onClick={() => setShowQRModal(false)}>×</button>
+            <div className="qr-header">
+              <h2>💕 Mã QR Kỷ Niệm</h2>
+              <p className="qr-subtitle">Quét để xem thông điệp đáng yêu</p>
+            </div>
+            <div className="qr-body">
+              <div className="qr-code-container">
+                <img src={qrCodeUrl} alt="QR Code" className="qr-code-image" />
+                {qrMemory.image && (
+                  <div className="qr-memory-photo">
+                    <img src={`http://localhost:5001${qrMemory.image}`} alt={qrMemory.title} />
+                  </div>
+                )}
+                <div className="qr-decoration">
+                  <span className="qr-heart">💝</span>
+                </div>
+              </div>
+              <div className="qr-info">
+                <div className="qr-memory-title">
+                  <span className="qr-icon">{categories.find(c => c.id === qrMemory.category)?.icon || '📌'}</span>
+                  <span>{qrMemory.title}</span>
+                </div>
+                <div className="qr-memory-date">
+                  {format(new Date(qrMemory.date), 'dd/MM/yyyy')}
+                </div>
+                <div className="qr-hint">
+                  <span className="qr-hint-icon">📱</span>
+                  <span>Quét mã QR bằng camera điện thoại để xem thông điệp yêu thương</span>
+                </div>
+              </div>
+            </div>
+            <div className="qr-actions">
+              <button onClick={downloadQRCode} className="qr-download-btn">
+                📥 Tải xuống
+              </button>
+              <button onClick={printQRCode} className="qr-print-btn">
+                🖨️ In
+              </button>
+              <button onClick={() => setShowQRModal(false)} className="qr-close-action-btn">
+                Đóng
+              </button>
+            </div>
+            
+            <div className="qr-ideas">
+              <h3>💡 Ý tưởng sử dụng QR Code:</h3>
+              <div className="ideas-grid">
+                <div className="idea-item">
+                  <span className="idea-icon">📖</span>
+                  <span className="idea-text">Dán vào album ảnh</span>
+                </div>
+                <div className="idea-item">
+                  <span className="idea-icon">🎁</span>
+                  <span className="idea-text">Gắn lên quà tặng</span>
+                </div>
+                <div className="idea-item">
+                  <span className="idea-icon">💌</span>
+                  <span className="idea-text">Gửi trong thiệp</span>
+                </div>
+                <div className="idea-item">
+                  <span className="idea-icon">🗺️</span>
+                  <span className="idea-text">Tạo treasure hunt</span>
+                </div>
+                <div className="idea-item">
+                  <span className="idea-icon">🖼️</span>
+                  <span className="idea-text">Làm tranh treo tường</span>
+                </div>
+                <div className="idea-item">
+                  <span className="idea-icon">📱</span>
+                  <span className="idea-text">Làm hình nền điện thoại</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {viewImage && (
         <div className="image-modal" onClick={() => setViewImage(null)}>
           <div className="image-modal-content">
@@ -1367,6 +1654,62 @@ function App() {
               </button>
               <button onClick={handleQuickNote} className="save-btn">
                 Lưu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showSpecialQR && (
+        <div className="qr-modal special-qr-modal" onClick={() => setShowSpecialQR(false)}>
+          <div className="qr-modal-content special-qr-content" onClick={(e) => e.stopPropagation()}>
+            <button className="qr-close-btn" onClick={() => setShowSpecialQR(false)}>×</button>
+            <div className="qr-header special-qr-header">
+              <h2>🎬 Mã QR Slideshow Đặc Biệt</h2>
+              <p className="qr-subtitle">Quét để xem toàn bộ tình cảm của anh dành cho em 🎵</p>
+            </div>
+            <div className="qr-body">
+              <div className="qr-code-container special-qr-container">
+                <img src={specialQRUrl} alt="Special QR Code" className="qr-code-image special-qr-image" />
+                <div className="special-qr-decoration">
+                  <span className="qr-heart animate-heart">💝</span>
+                  <span className="qr-heart animate-heart" style={{animationDelay: '0.5s'}}>💕</span>
+                  <span className="qr-heart animate-heart" style={{animationDelay: '1s'}}>💖</span>
+                </div>
+              </div>
+              <div className="qr-info special-qr-info">
+                <div className="special-features">
+                  <div className="feature-item">
+                    <span className="feature-icon">📸</span>
+                    <span className="feature-text">Nhiều ảnh đẹp</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">🎵</span>
+                    <span className="feature-text">Nhạc đáng yêu</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">✨</span>
+                    <span className="feature-text">Hiệu ứng của Blue Original</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">💝</span>
+                    <span className="feature-text">Hàng ngàn lời nhắn</span>
+                  </div>
+                </div>
+                <div className="qr-hint special-qr-hint">
+                  <span className="qr-hint-icon">📱</span>
+                  <span>Quét mã QR để mở slideshow trên điện thoại. Tốt nhất xem ở chế độ toàn màn hình!</span>
+                </div>
+              </div>
+            </div>
+            <div className="qr-actions">
+              <button onClick={downloadSpecialQR} className="qr-download-btn">
+                📥 Tải xuống
+              </button>
+              <button onClick={() => window.open('/love-slideshow', '_blank')} className="qr-preview-btn">
+                👁️ Xem trước
+              </button>
+              <button onClick={() => setShowSpecialQR(false)} className="qr-close-action-btn">
+                Đóng
               </button>
             </div>
           </div>

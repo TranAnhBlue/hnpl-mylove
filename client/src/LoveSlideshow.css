@@ -1,0 +1,368 @@
+/* Slideshow Container */
+.slideshow-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Background with blur */
+.slideshow-background {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px) brightness(0.4);
+  transition: background-image 1s ease-in-out;
+}
+
+/* Content */
+.slideshow-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Slides */
+.slide {
+  position: absolute;
+  width: 80%;
+  max-width: 800px;
+  height: 80%;
+  max-height: 600px;
+  opacity: 0;
+  transform: scale(0.8) translateX(100%);
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.slide.active {
+  opacity: 1;
+  transform: scale(1) translateX(0);
+  z-index: 2;
+}
+
+.slide.prev {
+  opacity: 0;
+  transform: scale(0.8) translateX(-100%);
+  z-index: 1;
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+/* Love Message */
+.love-message {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(50px);
+  background: linear-gradient(135deg, rgba(233, 30, 99, 0.95), rgba(156, 39, 176, 0.95));
+  padding: 20px 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 40px rgba(233, 30, 99, 0.5);
+  opacity: 0;
+  transition: all 0.5s ease;
+  z-index: 10;
+  max-width: 80%;
+}
+
+.love-message.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.love-message p {
+  color: white;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  line-height: 1.5;
+}
+
+/* Hearts Animation */
+.hearts-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.heart {
+  position: absolute;
+  bottom: -50px;
+  font-size: 30px;
+  animation: floatUp 8s infinite ease-in;
+  opacity: 0;
+}
+
+@keyframes floatUp {
+  0% {
+    bottom: -50px;
+    opacity: 0;
+    transform: translateX(0) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 110%;
+    opacity: 0;
+    transform: translateX(100px) rotate(360deg);
+  }
+}
+
+/* Controls */
+.slideshow-controls {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px 30px;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  z-index: 20;
+}
+
+.control-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
+.music-btn {
+  font-size: 24px;
+}
+
+.slide-counter {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 0 10px;
+  min-width: 80px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 8px 16px;
+}
+
+/* Dots */
+.dots-container {
+  display: flex;
+  gap: 12px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 0;
+}
+
+.dot.active {
+  background: white;
+  width: 30px;
+  border-radius: 6px;
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* Title */
+.slideshow-title {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  animation: fadeInDown 1s ease;
+  max-width: 90%;
+}
+
+.slideshow-title h1 {
+  color: white;
+  font-size: 36px;
+  font-weight: 700;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  background: linear-gradient(135deg, #FFE5EC, #F3E5F5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .slide {
+    width: 90%;
+    height: 65%;
+    max-height: none;
+  }
+
+  .love-message {
+    bottom: 120px;
+    padding: 12px 20px;
+    max-width: 85%;
+  }
+
+  .love-message p {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .slideshow-title {
+    top: 15px;
+  }
+
+  .slideshow-title h1 {
+    font-size: 22px;
+  }
+
+  .slideshow-controls {
+    gap: 12px;
+    padding: 10px 15px;
+    bottom: 20px;
+  }
+
+  .control-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+  }
+
+  .music-btn {
+    font-size: 20px;
+  }
+
+  .slide-counter {
+    font-size: 14px;
+    min-width: 60px;
+    padding: 6px 12px;
+  }
+
+  .heart {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .slide {
+    width: 92%;
+    height: 60%;
+  }
+
+  .love-message {
+    padding: 10px 18px;
+    bottom: 100px;
+    max-width: 88%;
+  }
+
+  .love-message p {
+    font-size: 14px;
+  }
+
+  .slideshow-title {
+    top: 10px;
+  }
+
+  .slideshow-title h1 {
+    font-size: 18px;
+  }
+
+  .slideshow-controls {
+    gap: 8px;
+    padding: 8px 12px;
+    bottom: 15px;
+    flex-wrap: nowrap;
+  }
+
+  .control-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 16px;
+  }
+
+  .music-btn {
+    font-size: 18px;
+  }
+
+  .slide-counter {
+    font-size: 12px;
+    min-width: 50px;
+    padding: 5px 10px;
+  }
+}
+
+/* Fullscreen mode */
+.slideshow-container:fullscreen {
+  background: #000;
+}
+
+.slideshow-container:fullscreen .slide {
+  max-width: 90vw;
+  max-height: 90vh;
+}
