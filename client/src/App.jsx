@@ -772,7 +772,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
         <div className="time">
           {format(currentTime, 'HH:mm')} ❤️
         </div>
-        <h1>Ngày Kỷ Niệm</h1>
+        <h1>Kỷ Niệm Của Chúng Mình</h1>
         {settings && (
           <div className="love-counter">
             <div className="days-count">{getDaysInLove()}</div>
@@ -1225,7 +1225,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
             <button className="back-btn" onClick={handleCloseModal}>
               ← Quay lại
             </button>
-            <h2>{editingMemory ? 'Chỉnh sửa' : 'Ngày Kỷ Niệm'}</h2>
+            <h2>{editingMemory ? 'Chỉnh sửa' : 'Kỷ Niệm Của Chúng Mình'}</h2>
             <button className="save-btn-header" onClick={handleSubmit}>
               Lưu
             </button>
@@ -1252,7 +1252,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
             </div>
 
             <div className="form-group">
-              <label>Ngày kỷ niệm</label>
+              <label>Kỷ Niệm Của Chúng Mình</label>
               <input
                 type="text"
                 placeholder=""

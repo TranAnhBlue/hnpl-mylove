@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "src": "/love-slideshow",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
