@@ -6,6 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import cloudinary from './config/cloudinary.js';
 
 dotenv.config();
 
@@ -28,17 +29,12 @@ app.use(cors({
 app.use(express.json());
 app.use('/uploads', express.static(uploadsDir));
 
-// Multer config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+// Multer config - sử dụng memory storage cho Cloudinary
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
 });
-
-const upload = multer({ storage });
 
 // Memory schema
 const memorySchema = new mongoose.Schema({
@@ -122,10 +118,36 @@ app.put('/api/settings', async (req, res) => {
 
 app.post('/api/memories', upload.single('image'), async (req, res) => {
   try {
+    let imageUrl = null;
+    
+    if (req.file) {
+      // Upload lên Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'anniversary-memories',
+            resource_type: 'auto',
+            transformation: [
+              { width: 1200, height: 1200, crop: 'limit' },
+              { quality: 'auto' }
+            ]
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+      
+      imageUrl = result.secure_url;
+      console.log('✅ Uploaded to Cloudinary:', imageUrl);
+    }
+    
     const memory = new Memory({
       title: req.body.title,
       date: req.body.date,
-      image: req.file ? `/uploads/${req.file.filename}` : null,
+      image: imageUrl,
       description: req.body.description || '',
       category: req.body.category || 'other',
       mood: req.body.mood || '❤️',
@@ -135,6 +157,7 @@ app.post('/api/memories', upload.single('image'), async (req, res) => {
     const newMemory = await memory.save();
     res.status(201).json(newMemory);
   } catch (error) {
+    console.error('Upload error:', error);
     res.status(400).json({ message: error.message });
   }
 });
@@ -150,9 +173,31 @@ app.put('/api/memories/:id', upload.single('image'), async (req, res) => {
       tags: req.body.tags ? (typeof req.body.tags === 'string' ? JSON.parse(req.body.tags) : req.body.tags) : [],
       favorite: req.body.favorite === 'true' || req.body.favorite === true
     };
+    
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+      // Upload lên Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'anniversary-memories',
+            resource_type: 'auto',
+            transformation: [
+              { width: 1200, height: 1200, crop: 'limit' },
+              { quality: 'auto' }
+            ]
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+      
+      updateData.image = result.secure_url;
+      console.log('✅ Updated image on Cloudinary:', result.secure_url);
     }
+    
     const updatedMemory = await Memory.findByIdAndUpdate(
       req.params.id,
       updateData,
@@ -160,6 +205,7 @@ app.put('/api/memories/:id', upload.single('image'), async (req, res) => {
     );
     res.json(updatedMemory);
   } catch (error) {
+    console.error('Update error:', error);
     res.status(400).json({ message: error.message });
   }
 });
