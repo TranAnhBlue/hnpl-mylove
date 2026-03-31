@@ -84,9 +84,32 @@ const loveMessages = [
 
 function LoveSlideshow() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false); // Bắt đầu với false
   const [showMessage, setShowMessage] = useState(true);
+  const [showPlayButton, setShowPlayButton] = useState(true); // Hiện nút play lớn
   const audioRef = useRef(null);
+
+  // Hàm bắt đầu phát nhạc
+  const startMusic = () => {
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+        setShowPlayButton(false);
+      }).catch(error => {
+        console.log('Play prevented:', error);
+      });
+    }
+  };
+
+  // Auto-play nhạc khi component mount (thử)
+  useEffect(() => {
+    // Thử autoplay sau 500ms
+    const timer = setTimeout(() => {
+      startMusic();
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -125,6 +148,16 @@ function LoveSlideshow() {
 
       {/* Main slideshow */}
       <div className="slideshow-content">
+        {/* Nút Play lớn ở giữa màn hình */}
+        {showPlayButton && (
+          <div className="play-overlay" onClick={startMusic}>
+            <div className="play-button-large">
+              <div className="play-icon">▶</div>
+              <p>Bấm để phát nhạc</p>
+            </div>
+          </div>
+        )}
+
         {loveImages.map((image, index) => (
           <div
             key={index}
@@ -185,8 +218,8 @@ function LoveSlideshow() {
         </div>
       </div>
 
-      {/* Audio - Nhạc nền "Lễ Đường Đi" */}
-      <audio ref={audioRef} loop>
+      {/* Audio - Nhạc nền "Lễ Đường Đi" - Autoplay */}
+      <audio ref={audioRef} loop autoPlay>
         {/* File nhạc "Lễ Đường.mp3" đã có trong thư mục music */}
         <source src="/music/Lễ Đường.mp3" type="audio/mpeg" />
         
