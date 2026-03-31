@@ -84,10 +84,43 @@ const loveMessages = [
 
 function LoveSlideshow() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false); // Bắt đầu với false
+  const [isPlaying, setIsPlaying] = useState(false);
   const [showMessage, setShowMessage] = useState(true);
-  const [showPlayButton, setShowPlayButton] = useState(true); // Hiện nút play lớn
+  const [showPlayButton, setShowPlayButton] = useState(true);
   const audioRef = useRef(null);
+  const containerRef = useRef(null);
+
+  // Hide mobile browser UI on mount
+  useEffect(() => {
+    // Request fullscreen on mobile
+    const hideAddressBar = () => {
+      if (containerRef.current) {
+        // Scroll to hide address bar
+        window.scrollTo(0, 1);
+        
+        // Try to enter fullscreen
+        if (containerRef.current.requestFullscreen) {
+          containerRef.current.requestFullscreen().catch(() => {});
+        } else if (containerRef.current.webkitRequestFullscreen) {
+          containerRef.current.webkitRequestFullscreen().catch(() => {});
+        } else if (containerRef.current.mozRequestFullScreen) {
+          containerRef.current.mozRequestFullScreen().catch(() => {});
+        } else if (containerRef.current.msRequestFullscreen) {
+          containerRef.current.msRequestFullscreen().catch(() => {});
+        }
+      }
+    };
+
+    // Delay to ensure DOM is ready
+    setTimeout(hideAddressBar, 100);
+    
+    // Hide on orientation change
+    window.addEventListener('orientationchange', hideAddressBar);
+    
+    return () => {
+      window.removeEventListener('orientationchange', hideAddressBar);
+    };
+  }, []);
 
   // Hàm bắt đầu phát nhạc
   const startMusic = () => {
@@ -139,7 +172,7 @@ function LoveSlideshow() {
   };
 
   return (
-    <div className="slideshow-container">
+    <div className="slideshow-container" ref={containerRef}>
       {/* Background with blur effect */}
       <div 
         className="slideshow-background"

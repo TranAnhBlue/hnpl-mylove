@@ -6,6 +6,16 @@ import QRCode from 'qrcode';
 import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const BASE_URL = API_URL.replace('/api', ''); // For image URLs
+
+// Helper function to get full image URL
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  // If already full URL (Cloudinary), return as is
+  if (imagePath.startsWith('http')) return imagePath;
+  // If relative path, prepend BASE_URL
+  return `${BASE_URL}${imagePath}`;
+};
 
 const categories = [
   { id: 'date', name: 'Hẹn hò', icon: '💑', color: '#E91E63' },
@@ -215,7 +225,7 @@ function App() {
     setCategory(memory.category || 'other');
     setMood(memory.mood || '❤️');
     setCurrentTags(memory.tags || []);
-    setImagePreview(memory.image ? `http://localhost:5001${memory.image}` : null);
+    setImagePreview(memory.image ? getImageUrl(memory.image) : null);
     setShowModal(true);
   };
 
@@ -1059,47 +1069,18 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                 key={memory._id} 
                 className="memory-card"
                 style={{ backgroundColor: categoryInfo.color }}
+                onClick={() => handleEdit(memory)}
               >
-                {bulkEditMode && (
-                  <input 
-                    type="checkbox"
-                    className="memory-checkbox"
-                    checked={selectedMemories.includes(memory._id)}
-                    onChange={() => toggleSelectMemory(memory._id)}
-                  />
-                )}
-                <button 
-                  className="favorite-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(memory._id);
-                  }}
-                >
-                  {memory.favorite ? '⭐' : '☆'}
-                </button>
                 <div className="time-badge">{getTimeAgo(memory.date)}</div>
-                <div className="category-badge">{categoryInfo.icon}</div>
-                <div className="mood-badge">{memory.mood || '❤️'}</div>
                 {memory.image && (
                   <img 
-                    src={`http://localhost:5001${memory.image}`} 
+                    src={getImageUrl(memory.image)} 
                     alt={memory.title}
                     className="memory-image"
-                    onClick={() => setViewImage(`http://localhost:5001${memory.image}`)}
                   />
                 )}
-                <div className="memory-content" onClick={() => handleEdit(memory)}>
+                <div className="memory-content">
                   <h3>{memory.title}</h3>
-                  {memory.tags && memory.tags.length > 0 && (
-                    <div className="memory-tags">
-                      {memory.tags.map(tag => (
-                        <span key={tag} className="memory-tag">{tag}</span>
-                      ))}
-                    </div>
-                  )}
-                  {memory.description && expandedMemory === memory._id && (
-                    <p className="memory-description">{memory.description}</p>
-                  )}
                   <div className="memory-date">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -1111,43 +1092,6 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                     ngày {format(new Date(memory.date), 'dd \'thg\' M, yyyy', { locale: vi })}
                   </div>
                 </div>
-                {memory.description && (
-                  <button 
-                    className="expand-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setExpandedMemory(expandedMemory === memory._id ? null : memory._id);
-                    }}
-                  >
-                    {expandedMemory === memory._id ? '▲' : '▼'}
-                  </button>
-                )}
-                <button 
-                  className="share-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    shareMemory(memory);
-                  }}
-                  title="Chia sẻ"
-                >
-                  📤
-                </button>
-                <button 
-                  className="qr-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    generateQRCode(memory);
-                  }}
-                  title="Tạo mã QR"
-                >
-                  📱
-                </button>
-                <button 
-                  className="delete-btn"
-                  onClick={() => handleDelete(memory._id)}
-                >
-                  ×
-                </button>
               </div>
             );
           })}
@@ -1172,10 +1116,10 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                       </div>
                       {memory.image && (
                         <img 
-                          src={`http://localhost:5001${memory.image}`} 
+                          src={getImageUrl(memory.image)} 
                           alt={memory.title}
                           className="timeline-image"
-                          onClick={() => setViewImage(`http://localhost:5001${memory.image}`)}
+                          onClick={() => setViewImage(getImageUrl(memory.image))}
                         />
                       )}
                       <h3 className="timeline-title">{memory.title}</h3>
@@ -1437,7 +1381,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                 <img src={qrCodeUrl} alt="QR Code" className="qr-code-image" />
                 {qrMemory.image && (
                   <div className="qr-memory-photo">
-                    <img src={`http://localhost:5001${qrMemory.image}`} alt={qrMemory.title} />
+                    <img src={getImageUrl(qrMemory.image)} alt={qrMemory.title} />
                   </div>
                 )}
                 <div className="qr-decoration">

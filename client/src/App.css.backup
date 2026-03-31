@@ -3071,21 +3071,3 @@ body.dark-mode .special-qr-hint {
     font-size: 30px;
   }
 }
-
-/* Hide unnecessary elements for clean layout like reference image */
-.category-badge,
-.mood-badge,
-.favorite-btn,
-.expand-btn,
-.share-btn,
-.qr-btn,
-.memory-card-actions,
-.memory-tags,
-.memory-description,
-.memory-checkbox {
-  display: none !important;
-}
-
-.memory-card-content {
-  display: contents;
-}

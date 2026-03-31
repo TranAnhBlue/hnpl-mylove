@@ -6,7 +6,7 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #000;
+  background: linear-gradient(135deg, #FFB6D9 0%, #FFC9E5 25%, #FFD6EC 50%, #FFC9E5 75%, #FFB6D9 100%);
 }
 
 /* Background with blur */
@@ -18,8 +18,9 @@
   bottom: -20px;
   background-size: cover;
   background-position: center;
-  filter: blur(20px) brightness(0.4);
+  filter: blur(25px) brightness(0.5);
   transition: background-image 1s ease-in-out;
+  opacity: 0.2;
 }
 
 /* Content */
@@ -139,18 +140,7 @@
 
 /* Controls */
 .slideshow-controls {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 15px 30px;
-  border-radius: 50px;
-  backdrop-filter: blur(10px);
-  z-index: 20;
+  display: none !important;
 }
 
 .control-btn {
@@ -465,4 +455,41 @@
   .play-button-large p {
     font-size: 16px;
   }
+}
+
+/* Hide mobile browser UI bars */
+.slideshow-container {
+  /* iOS Safari */
+  -webkit-overflow-scrolling: touch;
+  /* Hide address bar on scroll */
+  overflow: hidden;
+}
+
+/* Force fullscreen on mobile */
+@media (max-width: 768px) {
+  .slideshow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    overflow: hidden;
+  }
+  
+  /* Hide browser chrome */
+  body:has(.slideshow-container) {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Prevent pull-to-refresh on mobile */
+.slideshow-container {
+  overscroll-behavior: none;
+  touch-action: pan-x pan-y;
 }
