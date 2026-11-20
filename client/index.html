@@ -15,6 +15,37 @@
         overscroll-behavior: none;
         -webkit-overflow-scrolling: touch;
       }
+      
+      /* Critical CSS for mobile - Force override */
+      @media (max-width: 480px) {
+        .memory-card {
+          min-height: 65px !important;
+          max-height: 65px !important;
+          padding: 8px 10px 8px 48px !important;
+          gap: 10px !important;
+          border-radius: 12px !important;
+        }
+        
+        .memory-image {
+          width: 48px !important;
+          height: 48px !important;
+          border-radius: 8px !important;
+        }
+        
+        .memory-content h3 {
+          font-size: 14px !important;
+          margin-bottom: 4px !important;
+        }
+        
+        .memory-date {
+          font-size: 11px !important;
+          padding: 2px 7px !important;
+        }
+        
+        .memories-list {
+          gap: 10px !important;
+        }
+      }
     </style>
     <title>Kỷ Niệm Của Chúng Mình</title>
   </head>

@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import LoveSlideshow from './LoveSlideshow.jsx';
 import './index.css';
+import './DesignSystem.css';
+import './Layout.css';
 
 // Simple routing with hash
 const getComponent = () => {

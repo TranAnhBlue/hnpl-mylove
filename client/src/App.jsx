@@ -3,6 +3,11 @@ import axios from 'axios';
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import QRCode from 'qrcode';
+import GiftBox from './GiftBox';
+import MiniGames from './MiniGames';
+import LoveFeatures from './LoveFeatures';
+import FoodPicker from './FoodPicker';
+import Anniversary from './Anniversary';
 import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
@@ -86,6 +91,10 @@ function App() {
   const [showSpecialQR, setShowSpecialQR] = useState(false);
   const [specialQRUrl, setSpecialQRUrl] = useState('');
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  const [showGiftBox, setShowGiftBox] = useState(false);
+  const [showMiniGames, setShowMiniGames] = useState(false);
+  const [showLoveFeatures, setShowLoveFeatures] = useState(false);
+  const [showFoodPicker, setShowFoodPicker] = useState(false);
 
   useEffect(() => {
     fetchMemories();
@@ -799,6 +808,18 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           <button className="icon-btn special-qr-btn" onClick={generateSpecialQR} title="QR Slideshow Đặc Biệt">
             🎬
           </button>
+          <button className="icon-btn" onClick={() => setShowGiftBox(true)} title="Bốc Hộp Quà">
+            🎁
+          </button>
+          <button className="icon-btn" onClick={() => setShowMiniGames(true)} title="Mini Games">
+            🎮
+          </button>
+          <button className="icon-btn" onClick={() => setShowLoveFeatures(true)} title="Tính Năng Tình Yêu">
+            💕
+          </button>
+          <button className="icon-btn" onClick={() => setShowFoodPicker(true)} title="Hôm Nay Ăn Gì">
+            🍽️
+          </button>
           <button className="icon-btn" onClick={() => setShowFavorites(!showFavorites)} title="Yêu thích">
             {showFavorites ? '⭐' : '☆'}
           </button>
@@ -813,6 +834,23 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           </button>
         </div>
       </div>
+
+      <div className="floating-actions">
+        <button className="action-btn quick-note-btn" onClick={() => setShowQuickNote(true)} title="Ghi chú nhanh">
+          📝
+        </button>
+        <button className="action-btn widget-btn" onClick={() => setShowWidget(!showWidget)} title="Widget">
+          💭
+        </button>
+        <button className="action-btn countdown-btn" onClick={() => setShowCountdownModal(true)} title="Countdown">
+          ⏰
+        </button>
+        <button className="action-btn add-btn" onClick={() => setShowModal(true)} title="Thêm kỷ niệm" aria-label="Thêm kỷ niệm">
+          +
+        </button>
+      </div>
+
+      <Anniversary name1={settings?.coupleName1} name2={settings?.coupleName2} />
 
       {showWidget && randomMemory && (
         <div className="widget-container">
@@ -1077,6 +1115,10 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                     src={getImageUrl(memory.image)} 
                     alt={memory.title}
                     className="memory-image"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setViewImage(getImageUrl(memory.image));
+                    }}
                   />
                 )}
                 <div className="memory-content">
@@ -1148,21 +1190,6 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           ))}
         </div>
       )}
-
-      <div className="floating-actions">
-        <button className="action-btn quick-note-btn" onClick={() => setShowQuickNote(true)} title="Ghi chú nhanh">
-          📝
-        </button>
-        <button className="action-btn widget-btn" onClick={() => setShowWidget(!showWidget)} title="Widget">
-          💭
-        </button>
-        <button className="action-btn countdown-btn" onClick={() => setShowCountdownModal(true)} title="Countdown">
-          ⏰
-        </button>
-        <button className="action-btn add-btn" onClick={() => setShowModal(true)}>
-          +
-        </button>
-      </div>
 
       {showModal && (
         <div className="modal">
@@ -1670,6 +1697,30 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
             </div>
           </div>
         </div>
+      )}
+
+      {showGiftBox && (
+        <GiftBox 
+          onClose={() => setShowGiftBox(false)}
+        />
+      )}
+
+      {showMiniGames && (
+        <MiniGames 
+          onClose={() => setShowMiniGames(false)}
+        />
+      )}
+
+      {showLoveFeatures && (
+        <LoveFeatures 
+          onClose={() => setShowLoveFeatures(false)}
+        />
+      )}
+
+      {showFoodPicker && (
+        <FoodPicker 
+          onClose={() => setShowFoodPicker(false)}
+        />
       )}
     </div>
   );
