@@ -1,0 +1,25 @@
+.anniversary-editor { max-width: 720px; margin: 28px auto; padding: 24px; border: 1px solid #e8bdc4; border-radius: 18px; background: #fff8f6; color: #622538; }
+.anniversary-editor h3, .anniversary-editor h4 { margin: 0 0 14px; line-height: 1.5; }
+.anniversary-editor h4 { margin-top: 28px; }
+.anniversary-editor p, .anniversary-editor li { font-size: 1rem; line-height: 1.8; margin: 12px 0; }
+.anniversary-editor label { display: flex; flex-direction: column; gap: 8px; font-weight: 600; font-size: 1rem; margin: 18px 0; min-width: 0; }
+.anniversary-editor small { font-weight: 400; font-size: 0.875rem; line-height: 1.6; }
+.anniversary-editor input, .anniversary-editor textarea { width: 100%; min-width: 0; border: 1px solid #bd8b99; padding: 12px; border-radius: 10px; font: inherit; background: white; color: #42202c; }
+.anniversary-editor textarea { resize: vertical; }
+.plan-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.plan-progress { font-weight: 600; }
+.plan-preview { padding: 16px; margin: 16px 0; border: 1px solid #e8bdc4; border-radius: 12px; }
+.plan-preview summary { cursor: pointer; line-height: 1.6; font-weight: 600; }
+.plan-preview p { white-space: pre-line; }
+.plan-preview ol { padding-left: 24px; }
+.anniversary-editor :focus-visible { outline: 3px solid #a03e58; outline-offset: 3px; }
+.settings-save-error { max-width: 720px; margin: 12px auto; padding: 14px; color: #8d1538; background: #fff0f2; border-radius: 10px; line-height: 1.6; }
+.anniversary-invitation { grid-column: 1 / -1; padding: 28px; border: 1px solid #e8bdc4; border-radius: 18px; text-align: center; background: #fffcf8; }
+.anniversary-invitation h3 { font: 400 2rem/1.4 'Times New Roman', serif; margin: 12px 0; }
+.anniversary-invitation p { line-height: 1.8; margin: 14px 0; overflow-wrap: anywhere; white-space: pre-line; }
+.anniversary-invitation button { padding: 12px 20px; border: 0; border-radius: 30px; background: #862d49; color: white; font: inherit; cursor: pointer; }
+.anniversary-invitation button:focus-visible { outline: 3px solid #a03e58; outline-offset: 4px; }
+.anniversary-letter .personal-letter-paragraph { white-space: pre-line; overflow-wrap: anywhere; }
+body.dark-mode .anniversary-editor, body.dark-mode .anniversary-invitation { background: #3b2530; color: #f7dce2; border-color: #734353; }
+body.dark-mode .anniversary-editor input, body.dark-mode .anniversary-editor textarea { background: #281b22; color: #f7dce2; }
+@media (max-width: 480px) { .anniversary-editor { padding: 18px; } .plan-form-grid { grid-template-columns: minmax(0, 1fr); gap: 0; } }

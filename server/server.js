@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import cloudinary from './config/cloudinary.js';
+import { anniversaryPlanSchema } from './anniversaryPlan.js';
 
 dotenv.config();
 
@@ -55,7 +56,8 @@ const Memory = mongoose.model('Memory', memorySchema);
 const settingsSchema = new mongoose.Schema({
   anniversaryDate: { type: Date, required: true },
   coupleName1: { type: String, default: '' },
-  coupleName2: { type: String, default: '' }
+  coupleName2: { type: String, default: '' },
+  anniversaryPlan: { type: anniversaryPlanSchema, default: () => ({}) }
 });
 
 const Settings = mongoose.model('Settings', settingsSchema);
@@ -108,6 +110,9 @@ app.put('/api/settings', async (req, res) => {
       settings.anniversaryDate = req.body.anniversaryDate;
       settings.coupleName1 = req.body.coupleName1 || '';
       settings.coupleName2 = req.body.coupleName2 || '';
+      if (req.body.anniversaryPlan !== undefined) {
+        settings.anniversaryPlan = req.body.anniversaryPlan;
+      }
       await settings.save();
     }
     res.json(settings);

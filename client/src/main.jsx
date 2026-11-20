@@ -5,6 +5,7 @@ import LoveSlideshow from './LoveSlideshow.jsx';
 import './index.css';
 import './DesignSystem.css';
 import './Layout.css';
+import './RomanticTheme.css';
 
 // Simple routing with hash
 const getComponent = () => {

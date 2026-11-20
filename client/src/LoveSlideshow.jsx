@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './LoveSlideshow.css';
+import { anniversaryMessages } from './anniversaryMessages';
 
 // Tự động tạo danh sách ảnh từ love1.jpg đến love70.jpg
 const loveImages = Array.from({ length: 70 }, (_, i) => {
@@ -8,79 +9,6 @@ const loveImages = Array.from({ length: 70 }, (_, i) => {
   if (num === 59) return null;
   return `/images/love${num}.jpg`;
 }).filter(Boolean);
-
-const loveMessages = [
-  '💕 Mỗi khoảnh khắc bên em đều là kỷ niệm đáng nhớ',
-  '🌟 Em là ánh sáng trong cuộc đời anh',
-  '💝 Yêu em từ cái nhìn đầu tiên',
-  '🌹 Mỗi ngày bên em đều là ngày đặc biệt',
-  '💖 Mãi mãi bên nhau, không bao giờ rời xa',
-  '✨ Em là điều kỳ diệu nhất trong đời anh',
-  '💗 Cảm ơn em đã đến bên anh',
-  '🎀 Tình yêu của anh dành trọn cho em',
-  '💫 Mỗi giây phút bên em đều quý giá',
-  '🌺 Em là bông hoa đẹp nhất trong vườn đời anh',
-  '💞 Yêu em nhiều hơn mỗi ngày',
-  '🦋 Em làm trái tim anh rung động',
-  '🌈 Em mang màu sắc vào cuộc đời anh',
-  '💓 Tim anh chỉ đập vì em',
-  '🎵 Em là giai điệu ngọt ngào nhất',
-  '🌸 Hạnh phúc là được ở bên em',
-  '💘 Anh yêu em vô điều kiện',
-  '🌙 Em là ánh trăng soi đường cho anh',
-  '⭐ Em là ngôi sao sáng nhất',
-  '💝 Tình yêu anh dành cho em là vĩnh cửu',
-  '🎁 Em là món quà quý giá nhất',
-  '🌻 Nụ cười em là niềm vui của anh',
-  '💕 Cùng nhau viết nên câu chuyện tình yêu',
-  '🦄 Em là điều kỳ diệu duy nhất',
-  '🌟 Anh may mắn vì có em',
-  '💖 Mỗi kỷ niệm với em đều đẹp',
-  '🎀 Em là người anh muốn ở bên suốt đời',
-  '💗 Yêu em không cần lý do',
-  '✨ Em làm cuộc đời anh thêm ý nghĩa',
-  '🌹 Tình yêu anh dành cho em không bao giờ phai',
-  '💫 Em là tất cả những gì anh cần',
-  '🌺 Cảm ơn em vì đã yêu anh',
-  '💞 Bên em, anh cảm thấy trọn vẹn',
-  '🦋 Em là giấc mơ trở thành hiện thực',
-  '🌈 Cuộc đời anh đẹp hơn vì có em',
-  '💓 Trái tim anh thuộc về em',
-  '🎵 Em là bài hát yêu thích của anh',
-  '🌸 Mỗi ngày với em đều là lễ hội',
-  '💘 Anh sẽ yêu em mãi mãi',
-  '🌙 Em là ánh sáng trong đêm tối',
-  '⭐ Em tỏa sáng trong mắt anh',
-  '💝 Tình yêu này là của riêng chúng ta',
-  '🎁 Em là phần thưởng tuyệt vời nhất',
-  '🌻 Nụ cười em làm anh quên hết buồn phiền',
-  '💕 Cùng nhau đến cuối con đường',
-  '🦄 Em là điều không thể tin nổi',
-  '🌟 Anh tự hào vì có em',
-  '💖 Kỷ niệm với em là kho báu của anh',
-  '🎀 Em là lựa chọn đúng đắn nhất',
-  '💗 Yêu em là điều tự nhiên nhất',
-  '✨ Em mang lại ý nghĩa cho cuộc sống anh',
-  '🌹 Tình yêu này sẽ mãi xanh tươi',
-  '💫 Em là điều anh luôn tìm kiếm',
-  '🌺 Biết ơn vì có em trong đời',
-  '💞 Với em, anh là chính mình',
-  '🦋 Em biến giấc mơ thành sự thật',
-  '🌈 Em tô màu cho cuộc đời anh',
-  '💓 Tim anh chỉ có em',
-  '🎵 Em là giai điệu trong trái tim anh',
-  '🌸 Hạnh phúc là khi có em bên cạnh',
-  '💘 Anh yêu em hơn bất cứ điều gì',
-  '🌙 Em soi sáng con đường anh đi',
-  '⭐ Em là ngôi sao dẫn đường',
-  '💝 Tình yêu này là mãi mãi',
-  '🎁 Em là món quà từ trời',
-  '🌻 Nụ cười em là động lực của anh',
-  '💕 Cùng nhau tạo nên kỷ niệm đẹp',
-  '🦄 Em là phép màu trong đời anh',
-  '🌟 Cảm ơn em vì tất cả',
-  '💖 Mãi yêu em, mãi bên em'
-];
 
 function LoveSlideshow() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -204,7 +132,7 @@ function LoveSlideshow() {
 
         {/* Love message overlay */}
         <div className={`love-message ${showMessage ? 'show' : ''}`}>
-          <p>{loveMessages[currentIndex]}</p>
+          <p>{anniversaryMessages[currentIndex % anniversaryMessages.length]}</p>
         </div>
 
         {/* Hearts animation */}
@@ -247,7 +175,7 @@ function LoveSlideshow() {
 
         {/* Title */}
         <div className="slideshow-title">
-          <h1>💕 Kỷ Niệm Của Chúng Ta 💕</h1>
+          <h1>💕 Một Năm Yêu Nhau 💕</h1>
         </div>
       </div>
 

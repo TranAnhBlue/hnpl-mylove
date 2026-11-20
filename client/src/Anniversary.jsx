@@ -1,9 +1,16 @@
 import { useState } from 'react';
 import './Anniversary.css';
+import { createLetter, hasPersonalLetter, meetingLabel } from './anniversaryPlan';
+import './AnniversaryEditor.css';
 
-export default function Anniversary({ name1, name2 }) {
+export default function Anniversary({ name1, name2, plan = {} }) {
   const [letterOpen, setLetterOpen] = useState(false);
   const [wishCount, setWishCount] = useState(0);
+  const [invitationOpen, setInvitationOpen] = useState(false);
+  const personalLetter = hasPersonalLetter(plan);
+  const recipient = plan.recipient || 'em';
+  const sender = (plan.sender || 'Anh').toLocaleLowerCase('vi');
+  const hasInvitation = Boolean(meetingLabel(plan) && plan.meetingTime && plan.meetingPlace?.trim());
 
   return (
     <section className="anniversary" aria-labelledby="anniversary-title">
@@ -17,7 +24,9 @@ export default function Anniversary({ name1, name2 }) {
           {wishCount ? 'Gửi thêm một điều ước ♡' : 'Cùng nhau ước một điều ♡'}
         </button>
         <div className="anniversary-wish" role="status" aria-live="polite" aria-atomic="true">
-          {wishCount > 0 && <p>Mong năm thứ hai, và nhiều năm nữa,<br /><strong>người bên cạnh vẫn là nhau.</strong></p>}
+          {wishCount > 0 && (plan.wish?.trim()
+            ? <p>{plan.wish}</p>
+            : <p>Mong năm thứ hai, và nhiều năm nữa,<br /><strong>người bên cạnh vẫn là nhau.</strong></p>)}
         </div>
         {wishCount > 0 && (
           <div key={wishCount} className="anniversary-hearts" aria-hidden="true">
@@ -31,10 +40,10 @@ export default function Anniversary({ name1, name2 }) {
         <p className="anniversary-eyebrow">KỶ NIỆM MỘT NĂM YÊU NHAU</p>
         <p className="anniversary-names">{name1 || 'Anh'} <span aria-label="và">&</span> {name2 || 'Em'}</p>
         <h2 id="anniversary-title">Một năm bên nhau.<br /><em>Vẫn muốn chọn nhau.</em></h2>
-        <p className="anniversary-intro">Giữa bao nhiêu điều đổi thay, thật may vì chúng mình vẫn có nhau. Cảm ơn em đã làm những ngày bình thường trở thành những ngày anh muốn nhớ.</p>
+        <p className="anniversary-intro">Giữa bao nhiêu điều đổi thay, thật may vì chúng mình vẫn có nhau. Cảm ơn {recipient} đã làm những ngày bình thường trở thành những ngày {sender} muốn nhớ.</p>
         <div className="anniversary-actions">
           <button type="button" aria-expanded={letterOpen} aria-controls="anniversary-letter" onClick={() => setLetterOpen(!letterOpen)}>
-            <span aria-hidden="true">♡</span> {letterOpen ? 'Gấp lại lá thư' : 'Có một lá thư dành cho em'}
+            <span aria-hidden="true">♡</span> {letterOpen ? 'Gấp lại lá thư' : `Có một lá thư dành cho ${recipient}`}
           </button>
           <a href="/love-slideshow">Xem lại những khoảnh khắc</a>
         </div>
@@ -42,19 +51,33 @@ export default function Anniversary({ name1, name2 }) {
       </div>
       <figure className="anniversary-photo">
         <img src="/images/love1.jpg" alt="Một khoảnh khắc của chúng mình" />
-        <figcaption>Nơi có em, là nơi anh muốn ở lại.</figcaption>
+        <figcaption>Nơi có {recipient}, là nơi {sender} muốn ở lại.</figcaption>
         <span className="anniversary-seal" aria-hidden="true">1<br /><small>năm yêu</small></span>
       </figure>
       <div id="anniversary-letter" className="anniversary-letter" hidden={!letterOpen}>
         <span className="anniversary-letter-heart" aria-hidden="true">♡</span>
-        <p className="anniversary-eyebrow">GỬI NGƯỜI ANH THƯƠNG</p>
-        <h3>Mình đã có một năm thật đẹp, em nhỉ?</h3>
+        <p className="anniversary-eyebrow">GỬI NGƯỜI {sender.toLocaleUpperCase('vi')} THƯƠNG</p>
+        <h3>Mình đã có một năm thật đẹp, {personalLetter ? plan.recipient || 'em' : 'em'} nhỉ?</h3>
+        {personalLetter ? createLetter(plan).map((paragraph, index) => (
+          <p key={index} className="personal-letter-paragraph">{paragraph}</p>
+        )) : <>
         <p>Anh không biết từ lúc nào, những điều nhỏ bé có em lại trở thành phần anh mong đợi nhất trong ngày. Một tin nhắn, một tiếng cười, hay chỉ đơn giản là được ngồi cạnh em, chẳng cần nói gì nhiều.</p>
         <p>Cảm ơn em vì đã cùng anh đi qua một năm này. Vì những dịu dàng, vì sự kiên nhẫn, và vì đã để anh được là một phần trong thế giới của em.</p>
         <p>Ở chặng đường tiếp theo, anh mong chúng mình vẫn dành thời gian lắng nghe nhau, vẫn nắm tay sau những ngày không dễ dàng, và vẫn tìm thấy niềm vui trong những điều thật nhỏ.</p>
-        <p className="anniversary-letter-ending">Nếu được bắt đầu lại, anh vẫn muốn gặp em.<br />Và lại cùng em viết tiếp câu chuyện của chúng mình.</p>
-        <p className="anniversary-signature">Thương em, hôm nay và những ngày sau.<br />{name1 || 'Anh'} ♡</p>
+        </>}
+        <p className="anniversary-letter-ending">Nếu được bắt đầu lại, vẫn muốn chọn nhau.<br />Và lại cùng nhau viết tiếp câu chuyện của chúng mình.</p>
+        <p className="anniversary-signature">Thương {personalLetter ? plan.recipient || 'em' : 'em'}, hôm nay và những ngày sau.<br />{name1 || plan.sender || 'Anh'} ♡</p>
       </div>
+      {hasInvitation && <section className="anniversary-invitation" aria-labelledby="invitation-title">
+        <p className="anniversary-eyebrow">MỘT BẤT NGỜ NHỎ DÀNH CHO NGƯỜI THƯƠNG</p>
+        <h3 id="invitation-title">Mình có một cuộc hẹn</h3>
+        <button type="button" aria-expanded={invitationOpen} aria-controls="anniversary-invitation-details" onClick={() => setInvitationOpen(!invitationOpen)}>{invitationOpen ? 'Gấp lại thiệp hẹn' : 'Mở thiệp hẹn của chúng mình ♡'}</button>
+        <div id="anniversary-invitation-details" hidden={!invitationOpen}>
+          <p><strong>{meetingLabel(plan)}</strong></p>
+          <p>{plan.meetingPlace}</p>
+          {plan.invitation?.trim() && <p>{plan.invitation}</p>}
+        </div>
+      </section>}
     </section>
   );
 }

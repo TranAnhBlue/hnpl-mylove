@@ -8,6 +8,9 @@ import MiniGames from './MiniGames';
 import LoveFeatures from './LoveFeatures';
 import FoodPicker from './FoodPicker';
 import Anniversary from './Anniversary';
+import AnniversaryEditor from './AnniversaryEditor';
+import { emptyPlan } from './anniversaryPlan';
+import coupleProfile from './coupleProfile.json';
 import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
@@ -48,11 +51,14 @@ function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [viewImage, setViewImage] = useState(null);
   const [editingMemory, setEditingMemory] = useState(null);
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState(coupleProfile);
   const [showSettings, setShowSettings] = useState(false);
-  const [anniversaryDate, setAnniversaryDate] = useState('');
-  const [coupleName1, setCoupleName1] = useState('');
-  const [coupleName2, setCoupleName2] = useState('');
+  const [anniversaryDate, setAnniversaryDate] = useState(coupleProfile.anniversaryDate);
+  const [coupleName1, setCoupleName1] = useState(coupleProfile.coupleName1);
+  const [coupleName2, setCoupleName2] = useState(coupleProfile.coupleName2);
+  const [anniversaryPlan, setAnniversaryPlan] = useState({ ...coupleProfile.anniversaryPlan });
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsError, setSettingsError] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('other');
   const [mood, setMood] = useState('❤️');
@@ -153,22 +159,43 @@ function App() {
       setAnniversaryDate(response.data.anniversaryDate.split('T')[0]);
       setCoupleName1(response.data.coupleName1 || '');
       setCoupleName2(response.data.coupleName2 || '');
+      setAnniversaryPlan({ ...emptyPlan, ...response.data.anniversaryPlan });
     } catch (error) {
       console.error('Error fetching settings:', error);
     }
   };
 
   const handleSaveSettings = async () => {
+    if (settingsSaving) return;
+    setSettingsError('');
+    if (!anniversaryDate) {
+      setSettingsError('Bạn điền ngày bắt đầu yêu trước khi lưu nhé.');
+      return;
+    }
+    setSettingsSaving(true);
     try {
-      await axios.put(`${API_URL}/settings`, {
+      const response = await axios.put(`${API_URL}/settings`, {
         anniversaryDate,
         coupleName1,
-        coupleName2
+        coupleName2,
+        anniversaryPlan: {
+          ...anniversaryPlan,
+          sender: anniversaryPlan.sender.trim() || 'Anh',
+          recipient: anniversaryPlan.recipient.trim() || 'em',
+        },
       });
-      fetchSettings();
+      if (!response.data.anniversaryPlan) {
+        setSettingsError('Backend chưa hỗ trợ lưu kịch bản. Hãy cập nhật và khởi động lại backend rồi lưu lần nữa. Nội dung bạn nhập vẫn còn ở đây.');
+        return;
+      }
+      setSettings(response.data);
+      setAnniversaryPlan({ ...emptyPlan, ...response.data.anniversaryPlan });
       setShowSettings(false);
     } catch (error) {
       console.error('Error saving settings:', error);
+      setSettingsError('Chưa lưu được. Bạn kiểm tra kết nối backend rồi thử lại nhé. Nội dung vừa nhập vẫn còn ở đây.');
+    } finally {
+      setSettingsSaving(false);
     }
   };
 
@@ -792,7 +819,8 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
         <div className="time">
           {format(currentTime, 'HH:mm')} ❤️
         </div>
-        <h1>Kỷ Niệm Của Chúng Mình</h1>
+        <p className="page-eyebrow">MỘT GÓC NHỎ, MỘT TÌNH YÊU LỚN</p>
+        <h1>Chuyện của chúng mình</h1>
         {settings && (
           <div className="love-counter">
             <div className="days-count">{getDaysInLove()}</div>
@@ -806,51 +834,59 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
         )}
         <div className="header-actions">
           <button className="icon-btn special-qr-btn" onClick={generateSpecialQR} title="QR Slideshow Đặc Biệt">
-            🎬
+            <span aria-hidden="true">🎬</span><span>Phim kỷ niệm</span>
           </button>
           <button className="icon-btn" onClick={() => setShowGiftBox(true)} title="Bốc Hộp Quà">
-            🎁
+            <span aria-hidden="true">🎁</span><span>Hộp quà</span>
           </button>
           <button className="icon-btn" onClick={() => setShowMiniGames(true)} title="Mini Games">
-            🎮
+            <span aria-hidden="true">🎮</span><span>Chơi cùng nhau</span>
           </button>
           <button className="icon-btn" onClick={() => setShowLoveFeatures(true)} title="Tính Năng Tình Yêu">
-            💕
+            <span aria-hidden="true">💕</span><span>Góc yêu thương</span>
           </button>
           <button className="icon-btn" onClick={() => setShowFoodPicker(true)} title="Hôm Nay Ăn Gì">
-            🍽️
+            <span aria-hidden="true">🍽️</span><span>Hôm nay ăn gì</span>
           </button>
           <button className="icon-btn" onClick={() => setShowFavorites(!showFavorites)} title="Yêu thích">
             {showFavorites ? '⭐' : '☆'}
+            <span>Yêu thích</span>
           </button>
           <button className="icon-btn" onClick={() => setDarkMode(!darkMode)} title="Chế độ tối">
             {darkMode ? '☀️' : '🌙'}
+            <span>{darkMode ? 'Giao diện sáng' : 'Giao diện tối'}</span>
           </button>
           <button className="icon-btn" onClick={() => setShowStats(true)} title="Thống kê">
-            📊
+            <span aria-hidden="true">📊</span><span>Nhìn lại</span>
           </button>
           <button className="icon-btn" onClick={() => setShowSettings(true)} title="Cài đặt">
-            ⚙️
+            <span aria-hidden="true">⚙️</span><span>Cài đặt</span>
           </button>
         </div>
       </div>
 
+      <Anniversary name1={settings?.coupleName1} name2={settings?.coupleName2} plan={settings?.anniversaryPlan} />
+      <div className="memories-heading">
+        <p className="page-eyebrow">NHỮNG ĐIỀU MÌNH MUỐN GIỮ</p>
+        <h2>Nhật ký hai đứa</h2>
+        <p>Một tấm ảnh, một câu chuyện, một ngày có nhau.</p>
+      </div>
       <div className="floating-actions">
         <button className="action-btn quick-note-btn" onClick={() => setShowQuickNote(true)} title="Ghi chú nhanh">
-          📝
+          <span aria-hidden="true">📝</span><span>Ghi chú</span>
         </button>
         <button className="action-btn widget-btn" onClick={() => setShowWidget(!showWidget)} title="Widget">
-          💭
+          <span aria-hidden="true">💭</span><span>Gợi nhớ</span>
         </button>
         <button className="action-btn countdown-btn" onClick={() => setShowCountdownModal(true)} title="Countdown">
-          ⏰
+          <span aria-hidden="true">⏰</span><span>Đếm ngược</span>
         </button>
         <button className="action-btn add-btn" onClick={() => setShowModal(true)} title="Thêm kỷ niệm" aria-label="Thêm kỷ niệm">
-          +
+          <span aria-hidden="true">＋</span><span>Thêm kỷ niệm</span>
         </button>
       </div>
 
-      <Anniversary name1={settings?.coupleName1} name2={settings?.coupleName2} />
+
 
       {showWidget && randomMemory && (
         <div className="widget-container">
@@ -936,12 +972,13 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           <input
             type="text"
             placeholder="🔍 Tìm kiếm..."
+            aria-label="Tìm kỷ niệm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <div className="controls-group">
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select">
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="sort-select" aria-label="Sắp xếp kỷ niệm">
             <option value="newest">Mới nhất</option>
             <option value="oldest">Cũ nhất</option>
             <option value="category">Danh mục</option>
@@ -970,12 +1007,16 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           <div className="view-toggle">
             <button 
               className={viewMode === 'grid' ? 'active' : ''}
+              aria-label="Xem dạng thẻ"
+              aria-pressed={viewMode === 'grid'}
               onClick={() => setViewMode('grid')}
             >
               ⊞
             </button>
             <button 
               className={viewMode === 'timeline' ? 'active' : ''}
+              aria-label="Xem dòng thời gian"
+              aria-pressed={viewMode === 'timeline'}
               onClick={() => setViewMode('timeline')}
             >
               ≡
@@ -1492,8 +1533,8 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
               ← Quay lại
             </button>
             <h2>Cài đặt</h2>
-            <button className="save-btn-header" onClick={handleSaveSettings}>
-              Lưu
+            <button className="save-btn-header" onClick={handleSaveSettings} disabled={settingsSaving}>
+              {settingsSaving ? 'Đang lưu…' : 'Lưu'}
             </button>
           </div>
           
@@ -1526,6 +1567,9 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                 onChange={(e) => setCoupleName2(e.target.value)}
               />
             </div>
+
+            {settingsError && <p className="settings-save-error" role="alert">{settingsError}</p>}
+            <AnniversaryEditor value={anniversaryPlan} onChange={setAnniversaryPlan} />
 
             <div className="settings-section">
               <h3>Sao lưu & Khôi phục</h3>
