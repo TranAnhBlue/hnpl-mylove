@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { formatDistanceToNow, format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -42,6 +42,7 @@ const colors = [
 ];
 
 function App() {
+  const mainAudioRef = useRef(null);
   const [memories, setMemories] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState('');
@@ -102,6 +103,17 @@ function App() {
   const [showLoveFeatures, setShowLoveFeatures] = useState(false);
   const [showFoodPicker, setShowFoodPicker] = useState(false);
 
+  const toggleMainMusic = () => {
+    if (!mainAudioRef.current) return;
+    if (isPlayingMusic) {
+      mainAudioRef.current.pause();
+      return;
+    }
+    mainAudioRef.current.play().catch(error => {
+      console.log('Autoplay prevented:', error);
+    });
+  };
+
   useEffect(() => {
     fetchMemories();
     fetchSettings();
@@ -115,6 +127,12 @@ function App() {
       setCurrentTime(new Date());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    mainAudioRef.current?.play().catch(error => {
+      console.log('Autoplay prevented:', error);
+    });
   }, []);
 
   useEffect(() => {
@@ -778,10 +796,10 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
     const specialMessage = `
 💕💕💕 THÔNG ĐIỆP YÊU THƯƠNG ĐẶC BIỆT 💕💕💕
 
-🎵 Quét mã QR này để xem slideshow ảnh đẹp với nhạc "Lễ Đường" lãng mạn!
+🎵 Quét mã QR này để xem slideshow ảnh đẹp với nhạc "Em Đồng Ý (I Do)" và "Ngày Đầu Tiên"!
 
-✨ 70 khoảnh khắc đáng nhớ
-🎶 Nhạc nền "Lễ Đường"
+✨ 155 khoảnh khắc đáng nhớ
+🎶 Playlist "Em Đồng Ý (I Do)" và "Ngày Đầu Tiên"
 💝 Hiệu ứng chuyển cảnh mượt mà
 🌟 Được tạo với tất cả tình yêu
 
@@ -836,6 +854,9 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           </div>
         )}
         <div className="header-actions">
+          <button className={`icon-btn ${isPlayingMusic ? 'active' : ''}`} onClick={toggleMainMusic} title={isPlayingMusic ? 'Tạm dừng Người Đầu Tiên' : 'Phát Người Đầu Tiên'} aria-pressed={isPlayingMusic}>
+            <span aria-hidden="true">{isPlayingMusic ? '🔊' : '🔇'}</span><span>{isPlayingMusic ? 'Đang phát nhạc' : 'Bật nhạc'}</span>
+          </button>
           <button className="icon-btn special-qr-btn" onClick={generateSpecialQR} title="QR Slideshow Đặc Biệt">
             <span aria-hidden="true">🎬</span><span>Phim kỷ niệm</span>
           </button>
@@ -867,6 +888,15 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           </button>
         </div>
       </div>
+
+      <audio
+        ref={mainAudioRef}
+        src="/music/Người Đầu Tiên.mp3"
+        preload="auto"
+        loop
+        onPlay={() => setIsPlayingMusic(true)}
+        onPause={() => setIsPlayingMusic(false)}
+      />
 
       <Anniversary name1={settings?.coupleName1} name2={settings?.coupleName2} plan={settings?.anniversaryPlan} />
       <div className="memories-heading">
