@@ -65,7 +65,7 @@ export default function Anniversary({ name1, name2, plan = {} }) {
         <p>Cảm ơn em vì đã cùng anh đi qua một năm này. Vì những dịu dàng, vì sự kiên nhẫn, và vì đã để anh được là một phần trong thế giới của em.</p>
         <p>Ở chặng đường tiếp theo, anh mong chúng mình vẫn dành thời gian lắng nghe nhau, vẫn nắm tay sau những ngày không dễ dàng, và vẫn tìm thấy niềm vui trong những điều thật nhỏ.</p>
         </>}
-        <p className="anniversary-letter-ending">Nếu được bắt đầu lại, vẫn muốn chọn nhau.<br />Và lại cùng nhau viết tiếp câu chuyện của chúng mình.</p>
+        <p className="anniversary-letter-ending">Một năm đã qua, anh vẫn muốn nắm tay em thật lâu.<br />Cùng nhau viết tiếp thật nhiều năm hạnh phúc nữa nhé.</p>
         <p className="anniversary-signature">Thương {personalLetter ? plan.recipient || 'em' : 'em'}, hôm nay và những ngày sau.<br />{name1 || plan.sender || 'Anh'} ♡</p>
       </div>
       {hasInvitation && <section className="anniversary-invitation" aria-labelledby="invitation-title">
