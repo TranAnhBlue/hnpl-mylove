@@ -471,7 +471,7 @@
   margin: 20px auto;
 }
 
-.memory-card {
+.match-card {
   aspect-ratio: 1;
   position: relative;
   cursor: pointer;
@@ -504,11 +504,11 @@
   transform: rotateY(180deg);
 }
 
-.memory-card.flipped .card-front {
+.match-card.flipped .card-front {
   transform: rotateY(180deg);
 }
 
-.memory-card.flipped .card-back {
+.match-card.flipped .card-back {
   transform: rotateY(0deg);
 }
 

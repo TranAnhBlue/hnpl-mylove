@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './LoveFeatures.css';
+import AnniversaryEditionBadge from './AnniversaryEditionBadge';
 
 // Feature 1: Thư Tình Bí Mật
 function LoveLetterFeature({ onClose }) {
@@ -36,8 +37,8 @@ function LoveLetterFeature({ onClose }) {
     const newLetter = {
       id: Date.now(),
       content,
-      from: 'Anh',
-      to: recipient || 'Em',
+      from: 'Chồng',
+      to: recipient || 'Vợ',
       date: new Date().toISOString(),
       scheduled: !!scheduledTime,
       scheduledTime: scheduledTime || null,
@@ -54,7 +55,7 @@ function LoveLetterFeature({ onClose }) {
 
   return (
     <div className="feature-container">
-      <h3>💌 Thư Tình Bí Mật</h3>
+      <h3>💌 Thư gửi cho năm thứ hai</h3>
       {!showWrite ? (
         <>
           <button className="feature-btn" onClick={() => setShowWrite(true)}>
@@ -76,12 +77,12 @@ function LoveLetterFeature({ onClose }) {
         <div className="write-letter">
           <input
             type="text"
-            placeholder="Gửi đến..."
+            placeholder="Gửi đến vợ..."
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
           />
           <textarea
-            placeholder="Viết thư tình của bạn..."
+            placeholder="Viết điều chồng muốn vợ đọc vào một ngày đặc biệt..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows="8"
@@ -129,7 +130,7 @@ function LoveJarFeature({ onClose }) {
 
   return (
     <div className="feature-container">
-      <h3>💝 Hũ Yêu Thương</h3>
+      <h3>💝 Hũ 100 điều thương vợ</h3>
       <div className="jar-stats">
         <div className="jar-visual">
           <div className="jar">
@@ -139,12 +140,12 @@ function LoveJarFeature({ onClose }) {
               ))}
             </div>
           </div>
-          <p>{notes.length} lời yêu thương</p>
+          <p>{notes.length}/100 điều thương nhau</p>
         </div>
       </div>
       <div className="jar-input">
         <textarea
-          placeholder="Viết lời yêu thương hôm nay..."
+          placeholder="Hôm nay chồng thương vợ vì..."
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           rows="3"
@@ -194,7 +195,7 @@ function LovePointsFeature({ onClose }) {
 
   return (
     <div className="feature-container">
-      <h3>🌟 Điểm Yêu Thương</h3>
+      <h3>🌟 Điểm yêu thương năm thứ hai</h3>
       <div className="points-header">
         <div className="level-badge">Level {level}</div>
         <div className="points-display">⭐ {points} điểm</div>
@@ -241,17 +242,17 @@ function DateCalendarFeature({ onClose }) {
   };
 
   const suggestions = [
-    '🍽️ Nhà hàng lãng mạn',
-    '🎬 Rạp chiếu phim',
-    '🌳 Công viên',
-    '☕ Quán cafe',
-    '🏖️ Bãi biển',
-    '🎨 Triển lãm nghệ thuật'
+    '🍽️ Bữa tối kỷ niệm',
+    '🎬 Xem lại phim hai đứa thích',
+    '🌳 Đi dạo và kể chuyện năm đầu tiên',
+    '☕ Quán cà phê chụp một tấm ảnh chung',
+    '🏔️ Lên kế hoạch trở lại Sa Pa',
+    '🎨 Làm một món đồ lưu niệm cùng nhau'
   ];
 
   return (
     <div className="feature-container">
-      <h3>🗓️ Lịch Hẹn Hò</h3>
+      <h3>🗓️ Lịch hẹn năm thứ hai</h3>
       {!showAdd ? (
         <>
           <button className="feature-btn" onClick={() => setShowAdd(true)}>
@@ -534,7 +535,7 @@ function Challenge30Feature({ onClose }) {
 
   return (
     <div className="feature-container">
-      <h3>🎪 Thử Thách 30 Ngày</h3>
+      <h3>🎪 30 ngày yêu nhau chủ động hơn</h3>
       <div className="challenge-progress">
         <div className="progress-circle">
           <svg viewBox="0 0 100 100">
@@ -572,11 +573,11 @@ function Challenge30Feature({ onClose }) {
 // Feature 8: Truth or Dare
 function TruthOrDareFeature({ onClose }) {
   const truths = [
-    'Điều gì em thích nhất ở anh?',
-    'Kỷ niệm đáng nhớ nhất của mình?',
-    'Em mơ ước gì cho tương lai?',
-    'Điều gì làm em hạnh phúc nhất?',
-    'Em yêu anh từ khi nào?',
+    'Điều gì vợ thương nhất ở chồng sau một năm?',
+    'Khoảnh khắc nào trong năm đầu tiên vợ muốn sống lại?',
+    'Vợ mong điều gì cho năm thứ hai của chúng mình?',
+    'Điều nhỏ bé nào chồng làm khiến vợ hạnh phúc?',
+    'Khi nào vợ cảm thấy mình được yêu thương nhất?',
     'Món quà ý nghĩa nhất em nhận được?',
     'Nơi em muốn đi nhất với anh?',
     'Bài hát yêu thích của em?',
@@ -585,16 +586,16 @@ function TruthOrDareFeature({ onClose }) {
   ];
 
   const dares = [
-    'Hôn má anh 3 lần',
-    'Hát 1 bài cho anh nghe',
+    'Hôn má chồng 3 lần',
+    'Hát một đoạn cho chồng nghe',
     'Nhảy 30 giây',
-    'Nói "Anh yêu em" 5 lần',
-    'Gửi tin nhắn yêu cho anh',
+    'Nói “Vợ yêu chồng” 5 lần',
+    'Viết một tin nhắn cho năm thứ hai',
     'Chụp ảnh selfie ngớ ngẩn',
     'Kể 1 câu chuyện hài',
     'Làm 10 cái squat',
     'Vẽ trái tim lên tay',
-    'Ôm anh 1 phút'
+    'Ôm chồng một phút'
   ];
 
   const [current, setCurrent] = useState(null);
@@ -608,7 +609,7 @@ function TruthOrDareFeature({ onClose }) {
 
   return (
     <div className="feature-container">
-      <h3>🎲 Truth or Dare</h3>
+      <h3>🎲 Thật lòng hay thử thách kỷ niệm</h3>
       <div className="tod-buttons">
         <button className="truth-btn" onClick={() => pick('truth')}>
           💭 Truth
@@ -717,15 +718,15 @@ function LoveFeatures({ onClose }) {
   const [selectedFeature, setSelectedFeature] = useState(null);
 
   const features = [
-    { id: 1, name: 'Thư Tình Bí Mật', icon: '💌', component: LoveLetterFeature },
-    { id: 2, name: 'Hũ Yêu Thương', icon: '💝', component: LoveJarFeature },
-    { id: 3, name: 'Điểm Yêu Thương', icon: '🌟', component: LovePointsFeature },
-    { id: 4, name: 'Lịch Hẹn Hò', icon: '🗓️', component: DateCalendarFeature },
-    { id: 5, name: 'Playlist', icon: '🎵', component: PlaylistFeature },
-    { id: 6, name: 'Nhật Ký Tâm Trạng', icon: '🎭', component: MoodDiaryFeature },
-    { id: 7, name: 'Thử Thách 30 Ngày', icon: '🎪', component: Challenge30Feature },
-    { id: 8, name: 'Truth or Dare', icon: '🎲', component: TruthOrDareFeature },
-    { id: 9, name: 'Vẽ Tranh', icon: '🎨', component: DrawingFeature }
+    { id: 1, name: 'Thư cho năm thứ hai', icon: '💌', component: LoveLetterFeature },
+    { id: 2, name: '100 điều thương nhau', icon: '💝', component: LoveJarFeature },
+    { id: 3, name: 'Điểm yêu thương', icon: '🌟', component: LovePointsFeature },
+    { id: 4, name: 'Lịch hẹn năm thứ hai', icon: '🗓️', component: DateCalendarFeature },
+    { id: 5, name: 'Nhạc của hai đứa', icon: '🎵', component: PlaylistFeature },
+    { id: 6, name: 'Nhật ký cảm xúc', icon: '🎭', component: MoodDiaryFeature },
+    { id: 7, name: '30 ngày gần nhau hơn', icon: '🎪', component: Challenge30Feature },
+    { id: 8, name: 'Thật lòng hay thử thách', icon: '🎲', component: TruthOrDareFeature },
+    { id: 9, name: 'Vẽ điều mình mơ', icon: '🎨', component: DrawingFeature }
   ];
 
   const FeatureComponent = selectedFeature ? features.find(f => f.id === selectedFeature)?.component : null;
@@ -737,19 +738,20 @@ function LoveFeatures({ onClose }) {
         
         {!selectedFeature ? (
           <>
-            <h2 className="unified-title features-title">💕 Tính Năng Tình Yêu</h2>
-            <p className="unified-subtitle features-subtitle">Khám phá những tính năng đặc biệt</p>
+            <AnniversaryEditionBadge note="Những thói quen nhỏ để năm thứ hai vẫn luôn có nhau" />
+            <h2 className="unified-title features-title">💕 Góc yêu thương của vợ chồng mình</h2>
+            <p className="unified-subtitle features-subtitle">Giữ lời yêu bằng những điều thật nhỏ mỗi ngày.</p>
             
             <div className="features-grid">
               {features.map(feature => (
-                <div
+                <button type="button"
                   key={feature.id}
                   className="feature-card"
                   onClick={() => setSelectedFeature(feature.id)}
                 >
                   <div className="feature-icon">{feature.icon}</div>
                   <div className="feature-name">{feature.name}</div>
-                </div>
+                </button>
               ))}
             </div>
           </>
@@ -759,7 +761,7 @@ function LoveFeatures({ onClose }) {
               className="back-to-features-btn"
               onClick={() => setSelectedFeature(null)}
             >
-              ← Menu
+              Danh sách tính năng
             </button>
             {FeatureComponent && <FeatureComponent onClose={() => setSelectedFeature(null)} />}
           </>

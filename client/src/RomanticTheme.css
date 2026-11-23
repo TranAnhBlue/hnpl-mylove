@@ -37,6 +37,7 @@
 .app .header-actions .icon-btn { flex: 0 1 auto; width: auto; height: auto; min-height: 44px; border-radius: 12px; padding: 9px 12px; gap: 7px; font-size: 1rem; background: var(--romance-soft); color: var(--romance-ink); border: 1px solid transparent; box-shadow: none; animation: none; }
 .app .header-actions .icon-btn span:last-child { font-size: 0.875rem; line-height: 1.4; }
 .app .header-actions .icon-btn:hover { transform: translateY(-1px); border-color: #c58a9e; background: var(--romance-soft); }
+.app .header-actions .icon-btn.active { border-color: #a45770; background: #f3dbe3; color: #70243f; }
 .app .anniversary { border-color: var(--romance-border); box-shadow: var(--romance-shadow); border-radius: 24px; }
 .app .anniversary-celebration { padding: 32px 24px; border-radius: 16px; }
 .app .anniversary-celebration h3 { font-size: clamp(2.2rem, 4.5vw, 3.2rem); }
@@ -65,6 +66,8 @@
 .app .memory-card { display: grid !important; grid-template-columns: auto minmax(0, 1fr); align-items: center !important; padding: 20px !important; min-height: 120px !important; max-height: none !important; gap: 10px 16px !important; border: 1px solid var(--romance-border); border-radius: 18px !important; background: var(--romance-surface) !important; color: var(--romance-ink) !important; box-shadow: var(--romance-shadow) !important; }
 .app .memory-card:hover { transform: translateY(-2px) !important; border-color: #bf8b9d; }
 .app .memory-card .time-badge { position: static !important; grid-column: 1 / -1; justify-self: start; padding: 0 !important; font-size: 0.75rem !important; font-weight: 400 !important; background: transparent !important; color: var(--romance-muted) !important; }
+.app .memory-favorite-toggle { position: absolute; top: 14px; right: 14px; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--romance-border); border-radius: 50%; background: #fff9fa; color: #a45770; font: 1.5rem/1 'Times New Roman', serif; cursor: pointer; z-index: 2; }
+.app .memory-favorite-toggle.is-favorite { background: #862d49; border-color: #862d49; color: white; }
 .app .memory-card .memory-image { width: 72px !important; height: 72px !important; border-radius: 12px !important; }
 .app .memory-card .memory-content { min-width: 0; }
 .app .memory-card:not(:has(.memory-image)) .memory-content { grid-column: 1 / -1; }
@@ -72,6 +75,8 @@
 .app .memory-card .memory-date { padding: 0 !important; background: transparent; color: var(--romance-muted); font-size: 0.875rem !important; line-height: 1.5; white-space: normal; }
 .app .timeline-month { background: var(--romance-accent); color: white; border-radius: 12px; }
 .app .timeline-title, .app .widget-title { color: var(--romance-ink); }
+.app .favorite-btn-timeline { padding: 8px 14px; border: 1px solid var(--romance-border); border-radius: 10px; background: #fff7f8; color: #862d49; cursor: pointer; }
+.app .favorite-btn-timeline.active { background: #862d49; color: white; }
 .app .timeline-description, .app .widget-date { color: var(--romance-muted); }
 .app .modal { background: var(--romance-surface); color: var(--romance-ink); }
 .app .modal-header { position: sticky; top: 0; z-index: 5; gap: 12px; background: var(--romance-surface); border-bottom: 1px solid var(--romance-border); padding: 16px max(16px, calc((100vw - 840px) / 2)); }
@@ -86,6 +91,13 @@
 .app .stat-label { font-size: 0.875rem; color: var(--romance-muted); }
 .app .gift-box-content, .app .minigames-content, .app .love-features-content, .app .food-picker-content, .app .quick-note-content, .app .qr-modal-content { background: var(--romance-surface); color: var(--romance-ink); border: 1px solid var(--romance-border); border-radius: 24px; }
 .app .gift-title, .app .minigames-title, .app .unified-title { background: none; -webkit-text-fill-color: currentColor; color: var(--romance-accent); }
+.app .games-grid .game-card, .app .features-grid .feature-card { width: 100%; border: 1px solid var(--romance-border); background: var(--romance-surface); color: var(--romance-ink); font: inherit; }
+.app .game-name, .app .feature-name { color: var(--romance-accent); line-height: 1.5; }
+.app .anniversary-food-note { margin-top: 14px; color: var(--romance-accent); font: italic 1rem/1.7 'Times New Roman', serif; }
+.app .memories-empty { grid-column: 1 / -1; padding: 48px 24px; border: 1px dashed #c999aa; border-radius: 18px; background: #fff9f9; text-align: center; color: var(--romance-muted); }
+.app .memories-empty > span { color: var(--romance-accent); font: 3rem/1 'Times New Roman', serif; }
+.app .memories-empty h3 { margin: 14px 0 6px; color: var(--romance-ink); font: 400 1.5rem/1.4 'Times New Roman', serif; }
+.app .memories-empty p { font-size: 1rem; }
 .app .anniversary-editor { background: var(--romance-soft); color: var(--romance-ink); border-color: var(--romance-border); }
 .app .settings-section .action-btn { margin-top: 12px; background: var(--romance-accent); color: white; box-shadow: none; }
 body.dark-mode .app { --romance-ink: #f4e1e7; --romance-muted: #cfacb9; --romance-accent: #a9476a; --romance-surface: #30212a; --romance-soft: #402c36; --romance-border: #62404f; --romance-shadow: 0 12px 36px #0002; }

@@ -1,86 +1,87 @@
 import { useState, useEffect } from 'react';
 import './GiftBox.css';
+import AnniversaryEditionBadge from './AnniversaryEditionBadge';
 
 const gifts = [
   {
     id: 1,
-    name: 'Má hồng YSL',
+    name: 'Má hồng dành tặng vợ',
     icon: '💄',
     color: '#E91E63',
-    description: 'Má hồng YSL Rouge Volupté Shine - Màu đỏ hồng quyến rũ',
+    description: 'Một món quà nhỏ để Phương Linh luôn thật xinh trong mắt chồng',
     value: 'Trị giá ~1.200.000đ'
   },
   {
     id: 2,
-    name: '100.000đ',
-    icon: '💵',
+    name: 'Bữa tối do chồng mời',
+    icon: '🍽️',
     color: '#4CAF50',
-    description: 'Tiền mặt 100k - Tự do mua sắm theo ý thích',
-    value: '100.000đ'
+    description: 'Vợ chọn món, chồng chọn chỗ ngồi cạnh vợ và thanh toán',
+    value: 'Voucher hẹn hò năm thứ hai'
   },
   {
     id: 3,
-    name: '50.000đ',
-    icon: '💴',
+    name: 'Một ngày vợ làm công chúa',
+    icon: '👑',
     color: '#2196F3',
-    description: 'Tiền mặt 50k - Mua đồ ăn vặt hoặc trà sữa',
-    value: '50.000đ'
+    description: 'Vợ được chọn lịch trình, món ăn và điều mình muốn làm',
+    value: 'Có hiệu lực cả ngày'
   },
   {
     id: 4,
-    name: 'Cốp Makeup',
+    name: 'Hộp làm đẹp cho vợ',
     icon: '💅',
     color: '#9C27B0',
-    description: 'Bộ cốp makeup mini - Gồm phấn, son, mascara',
+    description: 'Một món làm đẹp vợ thích, hai đứa cùng đi chọn',
     value: 'Trị giá ~800.000đ'
   },
   {
     id: 5,
-    name: 'Voucher Cheat Day',
+    name: 'Cheat day của hai đứa',
     icon: '🍕',
     color: '#FF9800',
-    description: 'Voucher ăn thoải mái - Tùy chọn món yêu thích',
-    value: 'Không giới hạn'
+    description: 'Một buổi ăn những món vợ thích, không đếm calo và không vội vàng',
+    value: 'Kèm một tấm ảnh chung'
   },
   {
     id: 6,
-    name: 'Hộp Quà Bí Ẩn',
+    name: 'Chuyến đi bí mật',
     icon: '🎁',
     color: '#F44336',
-    description: 'Món quà đặc biệt - Chỉ biết khi mở ra',
-    value: 'Bất ngờ'
+    description: 'Một chuyến đi mới nối tiếp kỷ niệm Sa Pa đầu tiên của chúng mình',
+    value: 'Địa điểm do chồng chuẩn bị'
   },
   {
     id: 7,
-    name: 'Gấu Bông',
+    name: '100 cái ôm',
     icon: '🧸',
     color: '#FF69B4',
-    description: 'Gấu bông siêu cute - Ôm ngủ mỗi đêm',
-    value: 'Trị giá ~300.000đ'
+    description: 'Dùng bất cứ lúc nào vợ buồn, mệt hoặc đơn giản là muốn được ôm',
+    value: 'Không hết hạn'
   },
   {
     id: 8,
-    name: 'Nước Hoa Mini',
+    name: 'Hương thơm của kỷ niệm',
     icon: '🌸',
     color: '#BA68C8',
-    description: 'Nước hoa mini - Hương thơm quyến rũ',
+    description: 'Một chai nước hoa để sau này mùi hương cũng nhắc mình nhớ năm đầu tiên',
     value: 'Trị giá ~900.000đ'
   },
   {
     id: 9,
-    name: 'Voucher Spa',
+    name: 'Buổi chăm sóc dành cho vợ',
     icon: '💆',
     color: '#26A69A',
-    description: 'Voucher spa thư giãn - Massage toàn thân',
+    description: 'Một buổi thư giãn để vợ được nghỉ ngơi và được chiều chuộng',
     value: 'Trị giá ~500.000đ'
   },
   {
     id: 10,
-    name: 'Tai Nghe Bluetooth',
-    icon: '🎧',
+    name: 'Một điều ước của vợ',
+    icon: '🌟',
     color: '#5C6BC0',
-    description: 'Tai nghe không dây - Nghe nhạc cực đã',
-    value: 'Trị giá ~500.000đ'
+    description: 'Vợ nói một điều ước vừa sức, chồng sẽ nghiêm túc thực hiện',
+    value: 'Dành riêng cho Phương Linh'
   }
 ];
 
@@ -92,8 +93,8 @@ function GiftBox({ onClose }) {
 
   // Check if user has already opened a gift
   useEffect(() => {
-    const opened = localStorage.getItem('giftBoxOpened');
-    const savedGift = localStorage.getItem('giftBoxResult');
+    const opened = localStorage.getItem('anniversary1GiftOpened');
+    const savedGift = localStorage.getItem('anniversary1GiftResult');
 
     if (opened === 'true' && savedGift) {
       setHasOpened(true);
@@ -115,8 +116,8 @@ function GiftBox({ onClose }) {
       setIsOpened(true);
 
       // Save to localStorage
-      localStorage.setItem('giftBoxOpened', 'true');
-      localStorage.setItem('giftBoxResult', JSON.stringify(gift));
+      localStorage.setItem('anniversary1GiftOpened', 'true');
+      localStorage.setItem('anniversary1GiftResult', JSON.stringify(gift));
       setHasOpened(true);
     }, 1500);
   };
@@ -135,8 +136,8 @@ function GiftBox({ onClose }) {
 
   const handleAdminReset = () => {
     if (window.confirm('⚠️ ADMIN: Reset tất cả dữ liệu bốc quà?')) {
-      localStorage.removeItem('giftBoxOpened');
-      localStorage.removeItem('giftBoxResult');
+      localStorage.removeItem('anniversary1GiftOpened');
+      localStorage.removeItem('anniversary1GiftResult');
       setHasOpened(false);
       setIsOpened(false);
       setIsOpening(false);
@@ -157,11 +158,12 @@ function GiftBox({ onClose }) {
           🔄
         </button>
 
-        <h2 className="unified-title gift-title">🎁 Bốc Hộp Quà Kỷ Niệm</h2>
+        <AnniversaryEditionBadge note="Một lượt mở quà dành riêng cho Phương Linh" />
+        <h2 className="unified-title gift-title">🎁 Hộp quà năm đầu tiên</h2>
         {hasOpened ? (
-          <p className="unified-subtitle gift-subtitle">Bạn đã bốc quà rồi! Đây là món quà của bạn 💝</p>
+          <p className="unified-subtitle gift-subtitle">Vợ đã mở món quà kỷ niệm của mình rồi 💝</p>
         ) : (
-          <p className="unified-subtitle gift-subtitle">Mỗi hộp quà là một kỷ niệm đáng nhớ</p>
+          <p className="unified-subtitle gift-subtitle">Nhắm mắt ước một điều rồi mở quà nhé, vợ iu!</p>
         )}
 
         <div className="gift-container">
@@ -216,7 +218,7 @@ function GiftBox({ onClose }) {
               onClick={handleOpenGift}
               disabled={isOpening || hasOpened}
             >
-              {isOpening ? '🎁 Đang mở...' : hasOpened ? '✓ Đã bốc quà' : '🎁 Bốc Hộp Quà'}
+              {isOpening ? 'Đang mở điều bất ngờ…' : hasOpened ? '✓ Đã mở quà' : 'Mở quà kỷ niệm ♡'}
             </button>
           ) : (
             <>
@@ -227,7 +229,7 @@ function GiftBox({ onClose }) {
               )}
               {hasOpened && (
                 <div className="gift-message">
-                  💝 Bạn đã bốc quà rồi! Quay lại lần sau nhé!
+                  Món quà này đánh dấu năm đầu tiên của Đức Anh và Phương Linh ♡
                 </div>
               )}
             </>

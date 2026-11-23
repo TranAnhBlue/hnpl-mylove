@@ -1,27 +1,28 @@
 import { useState } from 'react';
 import './FoodPicker.css';
+import AnniversaryEditionBadge from './AnniversaryEditionBadge';
 
 const foods = [
   { 
     id: 1, 
-    name: 'Cửu Vân Long', 
+    name: 'Bữa tối kỷ niệm',
     icon: '🍜',
-    type: 'Quán ăn',
-    description: 'Món Trung Hoa đặc sắc'
+    type: 'Hẹn hò đặc biệt',
+    description: 'Một bàn nhỏ, ánh đèn ấm và thật nhiều thời gian dành cho nhau'
   },
   { 
     id: 2, 
-    name: 'Som Tum Thai', 
+    name: 'Vợ chọn món',
     icon: '🥗',
-    type: 'Quán ăn',
-    description: 'Ẩm thực Thái Lan'
+    type: 'Đặc quyền của vợ',
+    description: 'Phương Linh chọn món mình thích, Đức Anh lo phần còn lại'
   },
   { 
     id: 3, 
-    name: 'Bít Tết', 
+    name: 'Bít tết & lời chúc',
     icon: '🥩',
     type: 'Món ăn',
-    description: 'Thịt bò nướng thơm ngon'
+    description: 'Một bữa tối chậm rãi để cùng chúc mừng năm đầu tiên'
   },
   { 
     id: 4, 
@@ -32,10 +33,10 @@ const foods = [
   },
   { 
     id: 5, 
-    name: 'Brunch', 
+    name: 'Brunch của hai đứa',
     icon: '🥞',
     type: 'Món ăn',
-    description: 'Bữa sáng - trưa'
+    description: 'Một buổi sáng không vội, cùng nhau bắt đầu năm thứ hai'
   },
   { 
     id: 6, 
@@ -208,14 +209,15 @@ function FoodPicker({ onClose }) {
       <div className="unified-modal-content food-picker-content" onClick={(e) => e.stopPropagation()}>
         <button className="unified-close-btn" onClick={onClose}>×</button>
         
-        <h2 className="unified-title">🍽️ Hôm Nay Ăn Gì?</h2>
-        <p className="unified-subtitle">Để mình chọn món cho bạn nhé!</p>
+        <AnniversaryEditionBadge note="Một cuộc hẹn ngon lành cho chặng đường năm thứ hai" />
+        <h2 className="unified-title">🍽️ Bữa hẹn hôm nay</h2>
+        <p className="unified-subtitle">Vợ chồng mình để chiếc nút này quyết định nhé!</p>
 
         <div className="food-display">
           {!selectedFood ? (
             <div className="food-placeholder">
               <div className="food-icon-large">🤔</div>
-              <p>Nhấn nút bên dưới để bốc món!</p>
+              <p>Nhấn để chọn một ý tưởng cho buổi hẹn tiếp theo.</p>
             </div>
           ) : (
             <div className={`food-result ${isPicking ? 'picking' : 'selected'}`}>
@@ -223,6 +225,7 @@ function FoodPicker({ onClose }) {
               <h3 className="food-name">{selectedFood.name}</h3>
               <div className="food-type-badge">{selectedFood.type}</div>
               <p className="food-description">{selectedFood.description}</p>
+              <p className="anniversary-food-note">Điều quan trọng nhất: người ngồi đối diện vẫn là nhau ♡</p>
             </div>
           )}
         </div>
@@ -232,12 +235,12 @@ function FoodPicker({ onClose }) {
           onClick={pickFood}
           disabled={isPicking}
         >
-          {isPicking ? '🎲 Đang chọn...' : selectedFood ? '🔄 Chọn Lại' : '🎲 Bốc Món'}
+          {isPicking ? 'Đang chọn cuộc hẹn…' : selectedFood ? 'Chọn một ý tưởng khác' : 'Chọn bữa hẹn ♡'}
         </button>
 
         {history.length > 0 && (
           <div className="food-history">
-            <h4>📜 Lịch sử bốc món</h4>
+            <h4>Những ý tưởng vừa chọn</h4>
             <div className="history-list">
               {history.map((item, index) => (
                 <div key={index} className="history-item">
@@ -256,7 +259,7 @@ function FoodPicker({ onClose }) {
         )}
 
         <div className="food-grid">
-          <h4>🍴 Tất cả món ăn</h4>
+          <h4>Gợi ý cho những buổi hẹn năm thứ hai</h4>
           <div className="foods-list">
             {foods.map(food => (
               <div 

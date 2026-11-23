@@ -370,6 +370,7 @@ function App() {
   const getStats = () => {
     const total = memories.length;
     const withImages = memories.filter(m => m.image).length;
+    const favorites = memories.filter(m => m.favorite).length;
     const categoryStats = {};
     categories.forEach(cat => {
       categoryStats[cat.id] = memories.filter(m => m.category === cat.id).length;
@@ -381,7 +382,7 @@ function App() {
       new Date(b.createdAt) - new Date(a.createdAt)
     ).slice(0, 5);
     
-    return { total, withImages, categoryStats, mostUsedCategory, recentMemories };
+    return { total, withImages, favorites, categoryStats, mostUsedCategory, recentMemories };
   };
 
   const handleExport = () => {
@@ -813,6 +814,8 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
     link.click();
   };
 
+  const visibleMemories = getFilteredAndSortedMemories();
+
   return (
     <div className="app">
       <div className="header">
@@ -848,15 +851,15 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           <button className="icon-btn" onClick={() => setShowFoodPicker(true)} title="Hôm Nay Ăn Gì">
             <span aria-hidden="true">🍽️</span><span>Hôm nay ăn gì</span>
           </button>
-          <button className="icon-btn" onClick={() => setShowFavorites(!showFavorites)} title="Yêu thích">
+          <button className={`icon-btn ${showFavorites ? 'active' : ''}`} onClick={() => setShowFavorites(!showFavorites)} title="Những kỷ niệm yêu thích" aria-pressed={showFavorites}>
             {showFavorites ? '⭐' : '☆'}
             <span>Yêu thích</span>
           </button>
-          <button className="icon-btn" onClick={() => setDarkMode(!darkMode)} title="Chế độ tối">
+          <button className={`icon-btn ${darkMode ? 'active' : ''}`} onClick={() => setDarkMode(!darkMode)} title="Đổi không khí kỷ niệm" aria-pressed={darkMode}>
             {darkMode ? '☀️' : '🌙'}
-            <span>{darkMode ? 'Giao diện sáng' : 'Giao diện tối'}</span>
+            <span>{darkMode ? 'Nến ban ngày' : 'Đêm ánh nến'}</span>
           </button>
-          <button className="icon-btn" onClick={() => setShowStats(true)} title="Thống kê">
+          <button className="icon-btn" onClick={() => setShowStats(true)} title="Nhìn lại năm đầu tiên">
             <span aria-hidden="true">📊</span><span>Nhìn lại</span>
           </button>
           <button className="icon-btn" onClick={() => setShowSettings(true)} title="Cài đặt">
@@ -867,9 +870,9 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
 
       <Anniversary name1={settings?.coupleName1} name2={settings?.coupleName2} plan={settings?.anniversaryPlan} />
       <div className="memories-heading">
-        <p className="page-eyebrow">NHỮNG ĐIỀU MÌNH MUỐN GIỮ</p>
-        <h2>Nhật ký hai đứa</h2>
-        <p>Một tấm ảnh, một câu chuyện, một ngày có nhau.</p>
+        <p className="page-eyebrow">{showFavorites ? 'NHỮNG KHOẢNH KHẮC TRÁI TIM ĐÃ CHỌN' : 'NHỮNG ĐIỀU MÌNH MUỐN GIỮ'}</p>
+        <h2>{showFavorites ? 'Điều mình yêu nhất' : 'Nhật ký hai đứa'}</h2>
+        <p>{showFavorites ? 'Những kỷ niệm Đức Anh và Phương Linh muốn xem lại thật nhiều lần.' : 'Một tấm ảnh, một câu chuyện, một ngày có nhau.'}</p>
       </div>
       <div className="floating-actions">
         <button className="action-btn quick-note-btn" onClick={() => setShowQuickNote(true)} title="Ghi chú nhanh">
@@ -1141,7 +1144,14 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
 
       {viewMode === 'grid' ? (
         <div className="memories-list">
-          {getFilteredAndSortedMemories().map((memory, index) => {
+          {visibleMemories.length === 0 && (
+            <div className="memories-empty">
+              <span aria-hidden="true">♡</span>
+              <h3>{showFavorites ? 'Chưa có kỷ niệm nào được thả tim' : 'Chưa tìm thấy kỷ niệm phù hợp'}</h3>
+              <p>{showFavorites ? 'Mở một kỷ niệm và đánh dấu yêu thích để giữ nó tại đây nhé.' : 'Thử đổi từ khóa hoặc bộ lọc của bạn.'}</p>
+            </div>
+          )}
+          {visibleMemories.map((memory, index) => {
             const categoryInfo = categories.find(c => c.id === memory.category) || categories[5];
             return (
               <div 
@@ -1151,6 +1161,19 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                 onClick={() => handleEdit(memory)}
               >
                 <div className="time-badge">{getTimeAgo(memory.date)}</div>
+                <button
+                  type="button"
+                  className={`memory-favorite-toggle ${memory.favorite ? 'is-favorite' : ''}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    toggleFavorite(memory._id);
+                  }}
+                  aria-label={memory.favorite ? `Bỏ ${memory.title} khỏi yêu thích` : `Thêm ${memory.title} vào yêu thích`}
+                  aria-pressed={Boolean(memory.favorite)}
+                  title={memory.favorite ? 'Bỏ khỏi yêu thích' : 'Giữ trong điều mình yêu nhất'}
+                >
+                  {memory.favorite ? '♥' : '♡'}
+                </button>
                 {memory.image && (
                   <img 
                     src={getImageUrl(memory.image)} 
@@ -1181,7 +1204,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
         </div>
       ) : (
         <div className="timeline-view">
-          {groupByMonth(getFilteredAndSortedMemories()).map((group, idx) => (
+          {groupByMonth(visibleMemories).map((group, idx) => (
             <div key={idx} className="timeline-group">
               <div className="timeline-month">{group.label}</div>
               {group.memories.map((memory) => {
@@ -1210,6 +1233,9 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                         <p className="timeline-description">{memory.description}</p>
                       )}
                       <div className="timeline-actions">
+                        <button onClick={() => toggleFavorite(memory._id)} className={`favorite-btn-timeline ${memory.favorite ? 'active' : ''}`}>
+                          {memory.favorite ? '♥ Đã yêu thích' : '♡ Yêu thích'}
+                        </button>
                         <button onClick={() => handleEdit(memory)} className="edit-btn-timeline">
                           ✏️ Sửa
                         </button>
@@ -1591,16 +1617,26 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
             <button className="back-btn" onClick={() => setShowStats(false)}>
               ← Quay lại
             </button>
-            <h2>Thống kê</h2>
+            <h2>Nhìn lại năm đầu tiên</h2>
             <div style={{width: '60px'}}></div>
           </div>
           
           <div className="modal-content stats-content">
             <div className="stats-grid">
+              <div className="stat-card anniversary-stat-card">
+                <div className="stat-icon">♡</div>
+                <div className="stat-value">{getDaysInLove()}</div>
+                <div className="stat-label">Ngày đã chọn ở bên nhau</div>
+              </div>
               <div className="stat-card">
                 <div className="stat-icon">📝</div>
                 <div className="stat-value">{getStats().total}</div>
                 <div className="stat-label">Tổng kỷ niệm</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">⭐</div>
+                <div className="stat-value">{getStats().favorites}</div>
+                <div className="stat-label">Khoảnh khắc yêu thích</div>
               </div>
               <div className="stat-card">
                 <div className="stat-icon">📷</div>
@@ -1619,7 +1655,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
             </div>
 
             <div className="chart-section">
-              <h3>Kỷ niệm theo danh mục</h3>
+              <h3>Một năm của chúng mình qua từng câu chuyện</h3>
               <div className="chart-bars">
                 {categories.map(cat => {
                   const count = getStats().categoryStats[cat.id] || 0;
@@ -1643,7 +1679,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
             </div>
 
             <div className="recent-section">
-              <h3>Kỷ niệm gần đây</h3>
+              <h3>Những trang vừa viết gần đây</h3>
               <div className="recent-list">
                 {getStats().recentMemories.map(memory => (
                   <div key={memory._id} className="recent-item" onClick={() => {

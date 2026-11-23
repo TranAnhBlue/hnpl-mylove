@@ -1,0 +1,8 @@
+.anniversary-edition-badge { display: flex; align-items: center; justify-content: center; gap: 12px; width: fit-content; max-width: calc(100% - 52px); margin: 0 auto 22px; padding: 10px 16px; border: 1px solid #d9aebe; border-radius: 14px; background: #fff7f6; color: #6c2c42; text-align: left; }
+.anniversary-edition-badge > span { font: 2rem/1 'Times New Roman', serif; color: #9a3f5d; }
+.anniversary-edition-badge strong, .anniversary-edition-badge small { display: block; line-height: 1.5; }
+.anniversary-edition-badge strong { font-size: .875rem; }
+.anniversary-edition-badge small { color: #86606d; font-size: .75rem; }
+body.dark-mode .anniversary-edition-badge { border-color: #714455; background: #3b2832; color: #f5dfe6; }
+body.dark-mode .anniversary-edition-badge small { color: #d5b5c0; }
+@media (max-width: 480px) { .anniversary-edition-badge { max-width: calc(100% - 40px); } }

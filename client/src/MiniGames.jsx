@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import './MiniGames.css';
+import AnniversaryEditionBadge from './AnniversaryEditionBadge';
 
 // Game 1: Tìm Trái Tim (Whack-a-Mole)
 function HeartCatchGame({ onClose, onWin }) {
@@ -42,7 +43,7 @@ function HeartCatchGame({ onClose, onWin }) {
   return (
     <div className="game-container">
       <div className="game-header">
-        <h3>💝 Tìm Trái Tim</h3>
+        <h3>💝 Gom tim cho năm thứ hai</h3>
         <div className="game-stats">
           <span>⏱️ {timeLeft}s</span>
           <span>💖 {score}</span>
@@ -76,11 +77,11 @@ function HeartCatchGame({ onClose, onWin }) {
 // Game 2: Câu Đố Tình Yêu
 function LoveQuizGame({ onClose, onWin }) {
   const questions = [
-    { q: 'Ngày đầu tiên mình hẹn hò?', a: ['05/07/2025', '27/11/2025', '01/01/2024'], correct: 0 },
-    { q: 'Món ăn yêu thích của em?', a: ['Phở', 'Bún', 'Cơm tấm'], correct: 1 },
-    { q: 'Nơi hẹn hò đầu tiên?', a: ['Công viên', 'Rạp phim', 'Quán cafe'], correct: 1 },
-    { q: 'Màu sắc em thích nhất?', a: ['Hồng', 'Xanh', 'Tím'], correct: 0 },
-    { q: 'Bài hát yêu thích của mình?', a: ['Lễ Đường', 'Yêu 5', 'Anh Ơi Ở Lại'], correct: 1 }
+    { q: 'Ngày câu chuyện của chúng mình bắt đầu?', a: ['27/11/2024', '27/11/2025', '27/12/2025'], correct: 1 },
+    { q: 'Chuyến du lịch đầu tiên của hai đứa ở đâu?', a: ['Sa Pa', 'Đà Lạt', 'Hạ Long'], correct: 0 },
+    { q: 'Ai đã nói lời tỏ tình?', a: ['Phương Linh', 'Đức Anh', 'Cả hai cùng lúc'], correct: 1 },
+    { q: 'Điều ước cho chặng đường tiếp theo là gì?', a: ['Qua 10 mùa hè', 'Qua 100 cái Tết', 'Đi khắp 10 nơi'], correct: 1 },
+    { q: 'Kỷ niệm một năm của mình là ngày nào?', a: ['27/11/2026', '27/12/2026', '27/11/2027'], correct: 0 }
   ];
 
   const [currentQ, setCurrentQ] = useState(0);
@@ -104,7 +105,7 @@ function LoveQuizGame({ onClose, onWin }) {
   return (
     <div className="game-container">
       <div className="game-header">
-        <h3>🎯 Câu Đố Tình Yêu</h3>
+        <h3>🎯 Hiểu nhau sau một năm</h3>
         <div className="game-stats">
           <span>Câu {currentQ + 1}/{questions.length}</span>
           <span>✅ {score}</span>
@@ -123,7 +124,7 @@ function LoveQuizGame({ onClose, onWin }) {
         </div>
       ) : (
         <div className="game-result">
-          <h4>{score >= 3 ? '🎉 Giỏi quá!' : '💪 Học thêm về em nhé!'}</h4>
+          <h4>{score >= 3 ? '🎉 Hai đứa hiểu nhau thật nhiều!' : '💕 Mình cùng xem lại kỷ niệm nhé!'}</h4>
           <p>Điểm: {score}/{questions.length}</p>
           <button onClick={onClose}>Đóng</button>
         </div>
@@ -135,14 +136,14 @@ function LoveQuizGame({ onClose, onWin }) {
 // Game 3: Vòng Quay May Mắn
 function LuckyWheelGame({ onClose, onWin }) {
   const prizes = [
-    '💋 Hôn má anh 3 cái',
-    '📱 Gửi 1 tin nhắn yêu',
-    '🎵 Hát 1 đoạn bài hát',
-    '💕 Kể 3 điều thích ở anh',
-    '🤗 Ôm anh 10 giây',
-    '📸 Chụp ảnh selfie',
-    '💝 Làm 1 điều bất ngờ',
-    '🎁 Nhận quà đặc biệt'
+    '💋 Hôn má chồng 3 cái',
+    '📱 Gửi một tin nhắn cho năm thứ hai',
+    '🎵 Chọn bài hát của hai đứa',
+    '💕 Kể 3 điều vợ thương ở chồng',
+    '🤗 Ôm nhau thật chặt 20 giây',
+    '📸 Chụp ảnh kỷ niệm một năm',
+    '💝 Kể lại một khoảnh khắc ở Sa Pa',
+    '🎁 Cùng mở hộp quà đặc biệt'
   ];
 
   const [spinning, setSpinning] = useState(false);
@@ -167,7 +168,7 @@ function LuckyWheelGame({ onClose, onWin }) {
   return (
     <div className="game-container">
       <div className="game-header">
-        <h3>🎰 Vòng Quay May Mắn</h3>
+        <h3>🎰 Vòng quay hẹn hò năm thứ hai</h3>
       </div>
       <div className="wheel-container">
         <div 
@@ -198,7 +199,7 @@ function LuckyWheelGame({ onClose, onWin }) {
       </button>
       {result && (
         <div className="wheel-result">
-          <h4>🎉 Nhiệm vụ của em:</h4>
+          <h4>🎉 Nhiệm vụ của vợ:</h4>
           <p>{result}</p>
           <button onClick={onClose}>Đóng</button>
         </div>
@@ -358,18 +359,18 @@ function CupidShootGame({ onClose, onWin }) {
 // Game 6: Thử Thách Tình Yêu
 function DiceChallengeGame({ onClose, onWin }) {
   const challenges = [
-    '💋 Hôn má anh',
-    '🎵 Hát 1 bài cho anh nghe',
-    '💕 Kể 5 điều em thích ở anh',
-    '🤗 Ôm anh thật chặt',
-    '📱 Gửi tin nhắn yêu thương',
-    '💃 Nhảy 1 đoạn',
-    '😘 Gửi flying kiss',
-    '💝 Làm 1 điều bất ngờ',
-    '🎁 Hứa 1 điều gì đó',
-    '💖 Nói "Anh yêu em"',
-    '🌹 Tặng anh 1 nụ hôn ảo',
-    '✨ Khen anh 3 câu'
+    '💋 Hôn má chồng',
+    '🎵 Hát một đoạn cho chồng nghe',
+    '💕 Kể 5 điều vợ thương ở chồng',
+    '🤗 Hai đứa ôm nhau thật chặt',
+    '📱 Viết một tin nhắn cho năm thứ hai',
+    '💃 Cùng nhảy một đoạn',
+    '😘 Tặng nhau một nụ hôn',
+    '💝 Kể một bất ngờ đáng nhớ trong năm qua',
+    '🎁 Mỗi người hứa một điều nhỏ',
+    '💖 Nói “Chồng yêu vợ”',
+    '🌹 Chụp một tấm ảnh thật tình cảm',
+    '✨ Khen nhau 3 câu'
   ];
 
   const [rolling, setRolling] = useState(false);
@@ -402,7 +403,7 @@ function DiceChallengeGame({ onClose, onWin }) {
   return (
     <div className="game-container">
       <div className="game-header">
-        <h3>🎲 Thử Thách Tình Yêu</h3>
+        <h3>🎲 Thử thách của hai đứa</h3>
       </div>
       <div className="dice-container">
         <div className={`dice ${rolling ? 'rolling' : ''}`}>
@@ -421,7 +422,7 @@ function DiceChallengeGame({ onClose, onWin }) {
       </button>
       {challenge && (
         <div className="challenge-result">
-          <h4>💝 Thử thách của em:</h4>
+          <h4>💝 Thử thách kỷ niệm:</h4>
           <p>{challenge}</p>
           <button onClick={onClose}>Hoàn thành</button>
         </div>
@@ -476,7 +477,7 @@ function MemoryCardGame({ onClose, onWin }) {
         {cards.map((card, index) => (
           <div
             key={index}
-            className={`memory-card ${flipped.includes(index) || matched.includes(index) ? 'flipped' : ''}`}
+            className={`match-card ${flipped.includes(index) || matched.includes(index) ? 'flipped' : ''}`}
             onClick={() => flipCard(index)}
           >
             <div className="card-front">❓</div>
@@ -501,13 +502,13 @@ function MiniGames({ onClose }) {
   const [achievements, setAchievements] = useState([]);
 
   const games = [
-    { id: 1, name: 'Tìm Trái Tim', icon: '💝', component: HeartCatchGame },
-    { id: 2, name: 'Câu Đố Tình Yêu', icon: '🎯', component: LoveQuizGame },
-    { id: 3, name: 'Vòng Quay May Mắn', icon: '🎰', component: LuckyWheelGame },
-    { id: 4, name: 'Ghép Hình', icon: '🧩', component: PuzzleGame },
-    { id: 5, name: 'Bắn Tim Cupid', icon: '💘', component: CupidShootGame },
-    { id: 6, name: 'Thử Thách', icon: '🎲', component: DiceChallengeGame },
-    { id: 7, name: 'Lật Thẻ Bài', icon: '🃏', component: MemoryCardGame }
+    { id: 1, name: 'Gom tim năm thứ hai', icon: '💝', component: HeartCatchGame },
+    { id: 2, name: 'Hiểu nhau sau một năm', icon: '🎯', component: LoveQuizGame },
+    { id: 3, name: 'Vòng quay hẹn hò', icon: '🎰', component: LuckyWheelGame },
+    { id: 4, name: 'Ghép ảnh kỷ niệm', icon: '🧩', component: PuzzleGame },
+    { id: 5, name: 'Gửi tim cho nhau', icon: '💘', component: CupidShootGame },
+    { id: 6, name: 'Thử thách hai đứa', icon: '🎲', component: DiceChallengeGame },
+    { id: 7, name: 'Lật thẻ ký ức', icon: '🃏', component: MemoryCardGame }
   ];
 
   const handleWin = (message) => {
@@ -523,19 +524,20 @@ function MiniGames({ onClose }) {
         
         {!selectedGame ? (
           <>
-            <h2 className="unified-title minigames-title">🎮 Mini Games Tình Yêu</h2>
-            <p className="unified-subtitle minigames-subtitle">Chọn game để chơi cùng nhau</p>
+            <AnniversaryEditionBadge note="Cùng chơi, cùng nhớ lại hành trình năm đầu tiên" />
+            <h2 className="unified-title minigames-title">🎮 Trò chơi kỷ niệm một năm</h2>
+            <p className="unified-subtitle minigames-subtitle">Đức Anh và Phương Linh cùng thử xem mình hiểu nhau đến đâu nhé!</p>
             
             <div className="games-grid">
               {games.map(game => (
-                <div
+                <button type="button"
                   key={game.id}
                   className="game-card"
                   onClick={() => setSelectedGame(game.id)}
                 >
                   <div className="game-icon">{game.icon}</div>
                   <div className="game-name">{game.name}</div>
-                </div>
+                </button>
               ))}
             </div>
 
@@ -558,7 +560,7 @@ function MiniGames({ onClose }) {
               className="back-to-menu-btn"
               onClick={() => setSelectedGame(null)}
             >
-              ← Menu
+              Danh sách trò chơi
             </button>
             {GameComponent && (
               <GameComponent 
