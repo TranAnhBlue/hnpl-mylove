@@ -46,6 +46,7 @@ export default function Anniversary({ name1, name2, plan = {} }) {
             <span aria-hidden="true">♡</span> {letterOpen ? 'Gấp lại lá thư' : `Có một lá thư dành cho ${recipient}`}
           </button>
           <a href="/love-slideshow">Xem lại những khoảnh khắc</a>
+          <a href="/anniversary-surprise">Mở bất ngờ năm thứ hai ♡</a>
         </div>
         <p className="anniversary-footnote">Một năm đầu tiên, và còn nhiều cái nắm tay phía trước.</p>
       </div>

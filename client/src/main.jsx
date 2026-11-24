@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import LoveSlideshow from './LoveSlideshow.jsx';
+import AnniversarySurprise from './AnniversarySurprise.jsx';
 import './index.css';
 import './DesignSystem.css';
 import './Layout.css';
@@ -15,6 +16,10 @@ const getComponent = () => {
   // Support both /love-slideshow and /#/love-slideshow
   if (path === '/love-slideshow' || hash === '#/love-slideshow') {
     return <LoveSlideshow />;
+  }
+
+  if (path === '/anniversary-surprise' || hash === '#/anniversary-surprise') {
+    return <AnniversarySurprise />;
   }
   
   return <App />;

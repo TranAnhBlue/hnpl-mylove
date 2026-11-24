@@ -130,9 +130,27 @@ function App() {
   }, []);
 
   useEffect(() => {
-    mainAudioRef.current?.play().catch(error => {
-      console.log('Autoplay prevented:', error);
-    });
+    const audio = mainAudioRef.current;
+    if (!audio) return undefined;
+
+    audio.volume = 0.65;
+
+    const removeUnlockListeners = () => {
+      window.removeEventListener('pointerdown', tryPlayMusic, true);
+      window.removeEventListener('touchstart', tryPlayMusic, true);
+      window.removeEventListener('keydown', tryPlayMusic, true);
+    };
+
+    const tryPlayMusic = () => {
+      audio.play().then(removeUnlockListeners).catch(() => {});
+    };
+
+    window.addEventListener('pointerdown', tryPlayMusic, true);
+    window.addEventListener('touchstart', tryPlayMusic, true);
+    window.addEventListener('keydown', tryPlayMusic, true);
+    tryPlayMusic();
+
+    return removeUnlockListeners;
   }, []);
 
   useEffect(() => {
@@ -893,6 +911,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
         ref={mainAudioRef}
         src="/music/Người Đầu Tiên.mp3"
         preload="auto"
+        autoPlay
         loop
         onPlay={() => setIsPlayingMusic(true)}
         onPause={() => setIsPlayingMusic(false)}
