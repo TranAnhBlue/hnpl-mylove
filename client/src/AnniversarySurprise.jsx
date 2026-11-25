@@ -462,7 +462,7 @@ export default function AnniversarySurprise() {
       ) : (
         <section className="year-two-photo" aria-labelledby="year-two-photo-title">
           <div className="year-two-photo-intro">
-            <p className="surprise-eyebrow">KHOẢNH KHẮC SỐ 156</p>
+            <p className="surprise-eyebrow">KHOẢNH KHẮC SỐ 171</p>
             <h1 id="year-two-photo-title">Chụp tấm ảnh đầu tiên<br /><em>của năm thứ hai.</em></h1>
             <p>Không cần tạo dáng thật hoàn hảo. Chỉ cần hai đứa cùng có mặt trong khoảnh khắc này.</p>
           </div>
@@ -472,12 +472,12 @@ export default function AnniversarySurprise() {
               <figure className="captured-anniversary-photo">
                 <img src={anniversaryPhotoUrl} alt="Khoảnh khắc đầu tiên trong năm thứ hai của Đức Anh và Phương Linh" />
                 <figcaption>
-                  <div><span>ẢNH 156</span><strong>Năm thứ hai đã bắt đầu.</strong></div>
+                  <div><span>ẢNH 171</span><strong>Năm thứ hai đã bắt đầu.</strong></div>
                   <div className="captured-photo-actions">
                     <a href={anniversaryPhotoUrl} download="duc-anh-phuong-linh-nam-thu-hai.jpg">Tải ảnh về</a>
                     <button type="button" onClick={startCamera}>Chụp lại</button>
                     <button type="button" className="delete-photo-button" onClick={removeAnniversaryPhoto}>Xóa ảnh</button>
-                    <a href="/love-slideshow">Mở album 156 ảnh</a>
+                    <a href="/love-slideshow">Mở album 171 ảnh</a>
                   </div>
                 </figcaption>
               </figure>
@@ -515,7 +515,7 @@ export default function AnniversarySurprise() {
               {!yearTwoStarted ? (
                 <>
                   <p className="surprise-eyebrow">LỜI KẾT CỦA NĂM ĐẦU TIÊN</p>
-                  <h2>155 tấm ảnh kể lại những gì mình đã đi qua.<br /><em>Tấm ảnh này mở đầu những điều đang chờ phía trước.</em></h2>
+                  <h2>170 tấm ảnh kể lại những gì mình đã đi qua.<br /><em>Tấm ảnh này mở đầu những điều đang chờ phía trước.</em></h2>
                   <p>Năm thứ hai không cần hoàn hảo. Chỉ cần chúng mình vẫn chọn cùng nhau đi tiếp.</p>
                   <div className="year-two-finale-actions">
                     <a href={anniversaryPhotoUrl} download="duc-anh-phuong-linh-nam-thu-hai.jpg">Cất khoảnh khắc này</a>
@@ -529,7 +529,7 @@ export default function AnniversarySurprise() {
                   <h2>Năm thứ hai<br /><em>chính thức bắt đầu.</em></h2>
                   <p>Hẹn gặp lại ở đây vào ngày 27.11.2027, với thêm thật nhiều câu chuyện của hai đứa.</p>
                   <div className="year-two-finale-actions">
-                    <a href="/love-slideshow">Mở album 156 ảnh</a>
+                    <a href="/love-slideshow">Mở album 171 ảnh</a>
                     <a className="finale-home-link" href="/">Về trang chính</a>
                   </div>
                 </>

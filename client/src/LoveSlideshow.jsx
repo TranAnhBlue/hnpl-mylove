@@ -3,8 +3,13 @@ import './LoveSlideshow.css';
 import { anniversaryMessages } from './anniversaryMessages';
 import { readAnniversaryPhoto } from './anniversaryPhotoStorage';
 
-const TOTAL_LOVE_IMAGES = 155;
-const loveImages = Array.from({ length: TOTAL_LOVE_IMAGES }, (_, index) => `/images/love${index + 1}.jpg`);
+const TOTAL_LOVE_IMAGES = 170;
+const loveImages = [
+  ...Array.from({ length: 167 }, (_, index) => `/images/love${index + 1}.jpg`),
+  '/images/love169.jpg',
+  '/images/love170.jpg',
+  '/images/love168.jpg',
+];
 
 const slideshowTracks = [
   { title: 'Em Đồng Ý (I Do)', src: '/music/Em Đồng Ý (I Do).mp3' },
@@ -17,7 +22,7 @@ const albumChapters = [
   { title: 'Những lần đầu tiên', subtitle: 'Mỗi điều bình thường đều hóa thành một kỷ niệm.', start: 31, end: 62 },
   { title: 'Bình yên bên nhau', subtitle: 'Chỉ cần cạnh nhau, ngày nào cũng là ngày đáng nhớ.', start: 62, end: 93 },
   { title: 'Đi đâu cũng có nhau', subtitle: 'Những nơi mình từng đến và những cái nắm tay chưa rời.', start: 93, end: 124 },
-  { title: 'Một năm thành chúng ta', subtitle: '155 khoảnh khắc và một câu chuyện vẫn đang viết tiếp.', start: 124, end: 155 },
+  { title: 'Một năm thành chúng ta', subtitle: '170 khoảnh khắc và một câu chuyện vẫn đang viết tiếp.', start: 124, end: 170 },
 ];
 
 const FAVORITES_KEY = 'love-album-favorites';
@@ -95,7 +100,7 @@ function LoveSlideshow() {
     if (mode !== 'film' || !isSlideshowPlaying || isFinished) return undefined;
 
     const timer = window.setTimeout(() => {
-      if (currentIndex >= albumImages.length - 1) {
+      if (currentIndex >= loveImages.length - 1) {
         setIsSlideshowPlaying(false);
         setIsFinished(true);
         setShowMessage(false);
@@ -109,7 +114,7 @@ function LoveSlideshow() {
     }, 5000);
 
     return () => window.clearTimeout(timer);
-  }, [albumImages.length, currentIndex, isFinished, isSlideshowPlaying, mode]);
+  }, [currentIndex, isFinished, isSlideshowPlaying, mode]);
 
   useEffect(() => {
     if (!isMusicPlaying || !audioRef.current) return;
@@ -137,7 +142,7 @@ function LoveSlideshow() {
   };
 
   const startFilm = (index = 0) => {
-    setCurrentIndex(index);
+    setCurrentIndex(Math.min(index, loveImages.length - 1));
     setCurrentTrackIndex(0);
     setIsFinished(false);
     setIsSlideshowPlaying(true);
@@ -228,7 +233,7 @@ function LoveSlideshow() {
 
   const renderFilm = () => (
     <main className="film-mode">
-      <div className="slideshow-background" style={{ backgroundImage: `url(${albumImages[currentIndex]})` }} />
+      <div className="slideshow-background" style={{ backgroundImage: `url(${loveImages[currentIndex]})` }} />
       <header className="film-header">
         <button type="button" className="slideshow-back-btn film-back" onClick={goBackHome}>
           <span aria-hidden="true">‹</span> Quay lại
@@ -237,10 +242,10 @@ function LoveSlideshow() {
           <button type="button" className="active" aria-pressed="true">Cuộn phim</button>
           <button type="button" onClick={openAlbum}>Lật album</button>
         </div>
-        <div className="film-progress" aria-label={`Ảnh ${currentIndex + 1} trên ${albumImages.length}`}>
+        <div className="film-progress" aria-label={`Ảnh ${currentIndex + 1} trên ${loveImages.length}`}>
           <span>{String(currentIndex + 1).padStart(3, '0')}</span>
-          <i style={{ '--film-progress': `${((currentIndex + 1) / albumImages.length) * 100}%` }} />
-          <span>{albumImages.length}</span>
+          <i style={{ '--film-progress': `${((currentIndex + 1) / loveImages.length) * 100}%` }} />
+          <span>{loveImages.length}</span>
         </div>
       </header>
 
@@ -259,7 +264,7 @@ function LoveSlideshow() {
             }
           }}
         >
-          <img src={albumImages[currentIndex]} alt={`Kỷ niệm của Đức Anh và Phương Linh, ảnh ${currentIndex + 1}`} />
+          <img src={loveImages[currentIndex]} alt={`Kỷ niệm của Đức Anh và Phương Linh, ảnh ${currentIndex + 1}`} />
           {!isSlideshowPlaying && !isFinished && (
             <div className="playback-paused-indicator" aria-hidden="true"><span>▶</span><p>Chạm để tiếp tục</p></div>
           )}
@@ -273,7 +278,7 @@ function LoveSlideshow() {
           <section className="slideshow-ending" aria-labelledby="slideshow-ending-title">
             <span className="slideshow-ending-heart" aria-hidden="true">♡</span>
             <p className="slideshow-ending-eyebrow">HẾT MỘT NĂM ĐẦU TIÊN</p>
-            <h2 id="slideshow-ending-title">Cảm ơn vợ đã cùng chồng đi qua {albumImages.length} khoảnh khắc này.</h2>
+            <h2 id="slideshow-ending-title">Cảm ơn vợ đã cùng chồng đi qua {loveImages.length} khoảnh khắc này.</h2>
             <p>Chuyện của chúng mình vẫn còn rất nhiều điều đẹp đang chờ phía trước.</p>
             <div className="slideshow-ending-actions">
               <button type="button" className="ending-replay-btn" onClick={() => startFilm(0)}>Xem lại từ đầu</button>
@@ -370,7 +375,7 @@ function LoveSlideshow() {
           <div className="lightbox-actions">
             <button type="button" onClick={() => toggleFavorite(lightboxIndex)} className={favoriteSet.has(lightboxIndex) ? 'active' : ''}>{favoriteSet.has(lightboxIndex) ? '♥ Đã giữ trong tim' : '♡ Giữ trong tim'}</button>
             <button type="button" onClick={openRandomMemory}>✦ Ảnh ngẫu nhiên</button>
-            <button type="button" onClick={() => startFilm(lightboxIndex)}>▶ Xem phim từ đây</button>
+            {lightboxIndex < loveImages.length && <button type="button" onClick={() => startFilm(lightboxIndex)}>▶ Xem phim từ đây</button>}
           </div>
         </div>
       )}
