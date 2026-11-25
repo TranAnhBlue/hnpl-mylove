@@ -9,6 +9,7 @@ const loveImages = Array.from({ length: TOTAL_LOVE_IMAGES }, (_, index) => `/ima
 const slideshowTracks = [
   { title: 'Em Đồng Ý (I Do)', src: '/music/Em Đồng Ý (I Do).mp3' },
   { title: 'Ngày Đầu Tiên', src: '/music/Ngày Đầu Tiên.mp3' },
+  { title: 'Chăm Em Một Đời', src: '/music/Chăm Em Một Đời.mp3' },
 ];
 
 const albumChapters = [

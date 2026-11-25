@@ -4,6 +4,7 @@ import { deleteAnniversaryPhoto, readAnniversaryPhoto, saveAnniversaryPhoto } fr
 
 const UNLOCK_DATE = new Date('2027-11-27T00:00:00+07:00');
 const CAPSULE_KEY = 'anniversary-time-capsule-2027';
+const YEAR_TWO_STARTED_KEY = 'anniversary-year-two-started';
 const VOICE_DB = 'anniversary-surprise';
 const VOICE_STORE = 'voice';
 
@@ -47,6 +48,10 @@ function loadCapsule() {
   } catch {
     return [];
   }
+}
+
+function loadYearTwoStarted() {
+  return window.localStorage.getItem(YEAR_TWO_STARTED_KEY) === 'true';
 }
 
 function openVoiceDatabase() {
@@ -105,6 +110,7 @@ export default function AnniversarySurprise() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [photoCountdown, setPhotoCountdown] = useState(0);
+  const [yearTwoStarted, setYearTwoStarted] = useState(loadYearTwoStarted);
   const audioRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
@@ -325,6 +331,8 @@ export default function AnniversarySurprise() {
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92));
     if (!blob) return;
     await saveAnniversaryPhoto(blob);
+    window.localStorage.removeItem(YEAR_TWO_STARTED_KEY);
+    setYearTwoStarted(false);
     setAnniversaryPhotoUrl((current) => {
       if (current) URL.revokeObjectURL(current);
       return URL.createObjectURL(blob);
@@ -337,11 +345,18 @@ export default function AnniversarySurprise() {
     if (!shouldDelete) return;
     stopCamera();
     await deleteAnniversaryPhoto();
+    window.localStorage.removeItem(YEAR_TWO_STARTED_KEY);
+    setYearTwoStarted(false);
     setAnniversaryPhotoUrl((current) => {
       if (current) URL.revokeObjectURL(current);
       return '';
     });
     setCameraError('');
+  };
+
+  const beginYearTwo = () => {
+    window.localStorage.setItem(YEAR_TWO_STARTED_KEY, 'true');
+    setYearTwoStarted(true);
   };
 
   const scene = letterScenes[sceneIndex];
@@ -492,6 +507,35 @@ export default function AnniversarySurprise() {
               </div>
             )}
           </div>
+          {anniversaryPhotoUrl && !cameraOpen && (
+            <section className={`year-two-finale ${yearTwoStarted ? 'is-started' : ''}`} aria-live="polite">
+              <div className="finale-hearts" aria-hidden="true">
+                <i>♡</i><i>♡</i><i>♡</i><i>♡</i><i>♡</i>
+              </div>
+              {!yearTwoStarted ? (
+                <>
+                  <p className="surprise-eyebrow">LỜI KẾT CỦA NĂM ĐẦU TIÊN</p>
+                  <h2>155 tấm ảnh kể lại những gì mình đã đi qua.<br /><em>Tấm ảnh này mở đầu những điều đang chờ phía trước.</em></h2>
+                  <p>Năm thứ hai không cần hoàn hảo. Chỉ cần chúng mình vẫn chọn cùng nhau đi tiếp.</p>
+                  <div className="year-two-finale-actions">
+                    <a href={anniversaryPhotoUrl} download="duc-anh-phuong-linh-nam-thu-hai.jpg">Cất khoảnh khắc này</a>
+                    <button type="button" onClick={beginYearTwo}>Bắt đầu năm thứ hai ♡</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="finale-seal" aria-hidden="true">♡</span>
+                  <p className="surprise-eyebrow">27 · 11 · 2026</p>
+                  <h2>Năm thứ hai<br /><em>chính thức bắt đầu.</em></h2>
+                  <p>Hẹn gặp lại ở đây vào ngày 27.11.2027, với thêm thật nhiều câu chuyện của hai đứa.</p>
+                  <div className="year-two-finale-actions">
+                    <a href="/love-slideshow">Mở album 156 ảnh</a>
+                    <a className="finale-home-link" href="/">Về trang chính</a>
+                  </div>
+                </>
+              )}
+            </section>
+          )}
           <canvas ref={canvasRef} className="camera-canvas" aria-hidden="true" />
         </section>
       )}

@@ -320,6 +320,44 @@ body:has(.surprise-page) { margin: 0; background: var(--surprise-paper); }
 .captured-photo-actions a:last-child { background: #a73b62; }
 .camera-canvas { display: none; }
 
+.year-two-finale {
+  position: relative;
+  max-width: 1040px;
+  box-sizing: border-box;
+  margin: 34px auto 0;
+  overflow: hidden;
+  padding: clamp(48px, 7vw, 82px) clamp(22px, 7vw, 88px);
+  border: 1px solid rgba(123, 38, 70, 0.14);
+  border-radius: 30px;
+  background: rgba(255, 252, 249, 0.86);
+  color: #613147;
+  text-align: center;
+  box-shadow: 0 24px 75px rgba(83, 19, 43, 0.1);
+  animation: finale-reveal 700ms ease both;
+}
+.year-two-finale::before { position: absolute; top: -140px; left: 50%; width: 420px; height: 280px; border-radius: 50%; background: rgba(218, 129, 158, 0.2); filter: blur(48px); content: ''; transform: translateX(-50%); }
+.year-two-finale > *:not(.finale-hearts) { position: relative; z-index: 2; }
+.year-two-finale .surprise-eyebrow { margin-bottom: 18px; }
+.year-two-finale h2 { margin: 0; color: #57283d; font: 500 clamp(2rem, 4.7vw, 4rem)/1.16 "Times New Roman", serif; letter-spacing: -0.02em; }
+.year-two-finale h2 em { color: #a23960; font-weight: 400; }
+.year-two-finale > p:not(.surprise-eyebrow) { max-width: 660px; margin: 24px auto 0; color: #8c6877; font-size: 1rem; line-height: 1.75; }
+.year-two-finale-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 32px; }
+.year-two-finale-actions a, .year-two-finale-actions button { min-height: 50px; box-sizing: border-box; padding: 0 24px; border: 1px solid rgba(112, 32, 62, 0.18); border-radius: 999px; background: #fff; color: #7a3150; font-size: 0.84rem; font-weight: 850; line-height: 48px; text-decoration: none; cursor: pointer; }
+.year-two-finale-actions button, .year-two-finale.is-started .year-two-finale-actions a:first-child { border-color: transparent; background: var(--surprise-wine); color: #fff; box-shadow: 0 14px 32px rgba(103, 24, 55, 0.2); }
+.year-two-finale-actions .finale-home-link { background: transparent; box-shadow: none; }
+.finale-seal { display: grid; width: 64px; height: 64px; place-items: center; margin: 0 auto 18px; border-radius: 50%; background: #8d2f52; color: #fff; font-size: 1.85rem; box-shadow: 0 12px 32px rgba(107, 28, 58, 0.24); }
+.finale-hearts { position: absolute; inset: 0; pointer-events: none; }
+.finale-hearts i { position: absolute; bottom: -30px; color: rgba(165, 54, 94, 0.24); font: normal 1.6rem/1 serif; animation: finale-heart-float 6s ease-in infinite; }
+.finale-hearts i:nth-child(1) { left: 8%; animation-delay: 0s; }
+.finale-hearts i:nth-child(2) { left: 26%; animation-delay: 2.2s; font-size: 1rem; }
+.finale-hearts i:nth-child(3) { left: 51%; animation-delay: 0.8s; font-size: 2rem; }
+.finale-hearts i:nth-child(4) { left: 73%; animation-delay: 3.1s; font-size: 1.2rem; }
+.finale-hearts i:nth-child(5) { left: 91%; animation-delay: 1.6s; }
+.year-two-finale.is-started { background: linear-gradient(145deg, rgba(255, 250, 247, 0.94), rgba(247, 225, 233, 0.92)); }
+
+@keyframes finale-reveal { from { opacity: 0; transform: translateY(24px); } }
+@keyframes finale-heart-float { 0% { opacity: 0; transform: translateY(0) scale(0.8); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-420px) scale(1.2) rotate(18deg); } }
+
 @media (max-width: 900px) {
   .voice-letter { grid-template-columns: 1fr; }
   .voice-letter-photo { min-height: 58dvh; }
@@ -371,8 +409,11 @@ body:has(.surprise-page) { margin: 0; background: var(--surprise-paper); }
   .captured-anniversary-photo figcaption { padding: 20px 16px; }
   .captured-photo-actions { width: 100%; }
   .captured-photo-actions a, .captured-photo-actions button { flex: 1 1 auto; padding-inline: 12px; text-align: center; }
+  .year-two-finale { margin-top: 22px; padding: 44px 18px; border-radius: 20px; }
+  .year-two-finale-actions { align-items: stretch; flex-direction: column; }
+  .year-two-finale-actions a, .year-two-finale-actions button { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .voice-photo-collage, .voice-setup-actions button.recording { animation: none; }
+  .voice-photo-collage, .voice-setup-actions button.recording, .year-two-finale, .finale-hearts i { animation: none; }
 }
