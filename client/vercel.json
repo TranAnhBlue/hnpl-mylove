@@ -1,7 +1,7 @@
 {
   "routes": [
     {
-      "src": "/love-slideshow",
+      "src": "/(love-slideshow|anniversary-surprise|ducanh|phuonglinh)",
       "dest": "/index.html"
     },
     {

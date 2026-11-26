@@ -21,8 +21,16 @@ const getComponent = () => {
   if (path === '/anniversary-surprise' || hash === '#/anniversary-surprise') {
     return <AnniversarySurprise />;
   }
+
+  if (path === '/ducanh' || hash === '#/ducanh') {
+    return <App readOnly={false} />;
+  }
+
+  if (path === '/phuonglinh' || hash === '#/phuonglinh') {
+    return <App readOnly />;
+  }
   
-  return <App />;
+  return <App readOnly />;
 };
 
 ReactDOM.createRoot(document.getElementById('root')).render(

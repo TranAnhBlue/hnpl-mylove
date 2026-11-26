@@ -15,6 +15,7 @@ import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 const BASE_URL = API_URL.replace('/api', ''); // For image URLs
+const ADMIN_SESSION_KEY = 'anniversary-admin-key';
 
 // Helper function to get full image URL
 const getImageUrl = (imagePath) => {
@@ -41,8 +42,12 @@ const colors = [
   '#EF5350', '#FF8A65', '#DCE775', '#81C784', '#4DD0E1'
 ];
 
-function App() {
+function App({ readOnly = true }) {
   const mainAudioRef = useRef(null);
+  const [adminKeyInput, setAdminKeyInput] = useState('');
+  const [adminUnlocked, setAdminUnlocked] = useState(readOnly);
+  const [adminChecking, setAdminChecking] = useState(!readOnly);
+  const [adminLoginError, setAdminLoginError] = useState('');
   const [memories, setMemories] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState('');
@@ -128,6 +133,36 @@ function App() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (readOnly) {
+      delete axios.defaults.headers.common['x-admin-key'];
+      setAdminUnlocked(true);
+      setAdminChecking(false);
+      return;
+    }
+
+    const storedKey = window.sessionStorage.getItem(ADMIN_SESSION_KEY);
+    if (!storedKey) {
+      setAdminUnlocked(false);
+      setAdminChecking(false);
+      return;
+    }
+
+    setAdminChecking(true);
+    axios.post(`${API_URL}/admin/verify`, {}, { headers: { 'x-admin-key': storedKey } })
+      .then(() => {
+        axios.defaults.headers.common['x-admin-key'] = storedKey;
+        setAdminUnlocked(true);
+      })
+      .catch(() => {
+        window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
+        delete axios.defaults.headers.common['x-admin-key'];
+        setAdminUnlocked(false);
+        setAdminLoginError('Phiên quản trị đã hết hạn. Hãy nhập lại mật khẩu.');
+      })
+      .finally(() => setAdminChecking(false));
+  }, [readOnly]);
 
   useEffect(() => {
     const audio = mainAudioRef.current;
@@ -850,10 +885,61 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
     link.click();
   };
 
+  const unlockAdmin = async (event) => {
+    event.preventDefault();
+    const key = adminKeyInput.trim();
+    if (!key) return;
+
+    setAdminChecking(true);
+    setAdminLoginError('');
+    try {
+      await axios.post(`${API_URL}/admin/verify`, {}, { headers: { 'x-admin-key': key } });
+      window.sessionStorage.setItem(ADMIN_SESSION_KEY, key);
+      axios.defaults.headers.common['x-admin-key'] = key;
+      setAdminUnlocked(true);
+      setAdminKeyInput('');
+    } catch (error) {
+      const isUnavailable = error.response?.status === 503;
+      setAdminLoginError(isUnavailable
+        ? 'Railway chưa có biến ADMIN_KEY. Hãy cấu hình biến này rồi thử lại.'
+        : 'Mật khẩu quản trị chưa đúng.');
+    } finally {
+      setAdminChecking(false);
+    }
+  };
+
+  const lockAdmin = () => {
+    window.sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    delete axios.defaults.headers.common['x-admin-key'];
+    setAdminUnlocked(false);
+  };
+
   const visibleMemories = getFilteredAndSortedMemories();
 
+  if (!readOnly && !adminUnlocked) {
+    return (
+      <main className="admin-gate">
+        <form className="admin-gate-card" onSubmit={unlockAdmin}>
+          <span aria-hidden="true">♡</span>
+          <p className="page-eyebrow">KHU VỰC CỦA ĐỨC ANH</p>
+          <h1>Mở chế độ chỉnh sửa</h1>
+          <p>Nhập mật khẩu quản trị để thêm, sửa hoặc xóa kỷ niệm.</p>
+          <label htmlFor="admin-key">Mật khẩu quản trị</label>
+          <input id="admin-key" type="password" autoComplete="current-password" value={adminKeyInput} onChange={(event) => setAdminKeyInput(event.target.value)} disabled={adminChecking} autoFocus />
+          {adminLoginError && <p className="admin-gate-error" role="alert">{adminLoginError}</p>}
+          <button type="submit" disabled={adminChecking || !adminKeyInput.trim()}>{adminChecking ? 'Đang kiểm tra...' : 'Mở trang quản trị'}</button>
+          <a href="/phuonglinh">Xem bản dành cho Phương Linh</a>
+        </form>
+      </main>
+    );
+  }
+
   return (
-    <div className="app">
+    <div className={`app ${readOnly ? 'view-only-mode' : 'admin-mode'}`}>
+      <div className="access-mode-bar">
+        <span>{readOnly ? '♡ Bản chỉ xem dành cho Phương Linh' : 'Đang ở chế độ quản trị'}</span>
+        {readOnly ? <a href="/ducanh">Đức Anh đăng nhập</a> : <button type="button" onClick={lockAdmin}>Khóa chỉnh sửa</button>}
+      </div>
       <div className="header">
         <div className="time">
           {format(currentTime, 'HH:mm')} ❤️
@@ -901,9 +987,11 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           <button className="icon-btn" onClick={() => setShowStats(true)} title="Nhìn lại năm đầu tiên">
             <span aria-hidden="true">📊</span><span>Nhìn lại</span>
           </button>
-          <button className="icon-btn" onClick={() => setShowSettings(true)} title="Cài đặt">
-            <span aria-hidden="true">⚙️</span><span>Cài đặt</span>
-          </button>
+          {!readOnly && (
+            <button className="icon-btn" onClick={() => setShowSettings(true)} title="Cài đặt">
+              <span aria-hidden="true">⚙️</span><span>Cài đặt</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -924,18 +1012,24 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
         <p>{showFavorites ? 'Những kỷ niệm Đức Anh và Phương Linh muốn xem lại thật nhiều lần.' : 'Một tấm ảnh, một câu chuyện, một ngày có nhau.'}</p>
       </div>
       <div className="floating-actions">
-        <button className="action-btn quick-note-btn" onClick={() => setShowQuickNote(true)} title="Ghi chú nhanh">
-          <span aria-hidden="true">📝</span><span>Ghi chú</span>
-        </button>
+        {!readOnly && (
+          <button className="action-btn quick-note-btn" onClick={() => setShowQuickNote(true)} title="Ghi chú nhanh">
+            <span aria-hidden="true">📝</span><span>Ghi chú</span>
+          </button>
+        )}
         <button className="action-btn widget-btn" onClick={() => setShowWidget(!showWidget)} title="Widget">
           <span aria-hidden="true">💭</span><span>Gợi nhớ</span>
         </button>
-        <button className="action-btn countdown-btn" onClick={() => setShowCountdownModal(true)} title="Countdown">
-          <span aria-hidden="true">⏰</span><span>Đếm ngược</span>
-        </button>
-        <button className="action-btn add-btn" onClick={() => setShowModal(true)} title="Thêm kỷ niệm" aria-label="Thêm kỷ niệm">
-          <span aria-hidden="true">＋</span><span>Thêm kỷ niệm</span>
-        </button>
+        {!readOnly && (
+          <>
+            <button className="action-btn countdown-btn" onClick={() => setShowCountdownModal(true)} title="Countdown">
+              <span aria-hidden="true">⏰</span><span>Đếm ngược</span>
+            </button>
+            <button className="action-btn add-btn" onClick={() => setShowModal(true)} title="Thêm kỷ niệm" aria-label="Thêm kỷ niệm">
+              <span aria-hidden="true">＋</span><span>Thêm kỷ niệm</span>
+            </button>
+          </>
+        )}
       </div>
 
 
@@ -978,7 +1072,7 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                   </div>
                 );
               })}
-              {countdowns.length > 2 && (
+              {!readOnly && countdowns.length > 2 && (
                 <button className="see-more-btn" onClick={() => setShowCountdownModal(true)}>
                   +{countdowns.length - 2}
                 </button>
@@ -1042,13 +1136,15 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
           >
             🔧
           </button>
-          <button 
-            className={`control-btn ${bulkEditMode ? 'active' : ''}`}
-            onClick={() => setBulkEditMode(!bulkEditMode)}
-            title="Chọn nhiều"
-          >
-            {bulkEditMode ? '✓' : '☐'}
-          </button>
+          {!readOnly && (
+            <button
+              className={`control-btn ${bulkEditMode ? 'active' : ''}`}
+              onClick={() => setBulkEditMode(!bulkEditMode)}
+              title="Chọn nhiều"
+            >
+              {bulkEditMode ? '✓' : '☐'}
+            </button>
+          )}
           <button 
             className="control-btn"
             onClick={() => setShowGallery(true)}
@@ -1205,24 +1301,26 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
             return (
               <div 
                 key={memory._id} 
-                className="memory-card"
+                className={`memory-card ${readOnly ? 'memory-card-view-only' : ''}`}
                 style={{ backgroundColor: categoryInfo.color }}
-                onClick={() => handleEdit(memory)}
+                onClick={readOnly ? undefined : () => handleEdit(memory)}
               >
                 <div className="time-badge">{getTimeAgo(memory.date)}</div>
-                <button
-                  type="button"
-                  className={`memory-favorite-toggle ${memory.favorite ? 'is-favorite' : ''}`}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    toggleFavorite(memory._id);
-                  }}
-                  aria-label={memory.favorite ? `Bỏ ${memory.title} khỏi yêu thích` : `Thêm ${memory.title} vào yêu thích`}
-                  aria-pressed={Boolean(memory.favorite)}
-                  title={memory.favorite ? 'Bỏ khỏi yêu thích' : 'Giữ trong điều mình yêu nhất'}
-                >
-                  {memory.favorite ? '♥' : '♡'}
-                </button>
+                {!readOnly && (
+                  <button
+                    type="button"
+                    className={`memory-favorite-toggle ${memory.favorite ? 'is-favorite' : ''}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleFavorite(memory._id);
+                    }}
+                    aria-label={memory.favorite ? `Bỏ ${memory.title} khỏi yêu thích` : `Thêm ${memory.title} vào yêu thích`}
+                    aria-pressed={Boolean(memory.favorite)}
+                    title={memory.favorite ? 'Bỏ khỏi yêu thích' : 'Giữ trong điều mình yêu nhất'}
+                  >
+                    {memory.favorite ? '♥' : '♡'}
+                  </button>
+                )}
                 {memory.image && (
                   <img 
                     src={getImageUrl(memory.image)} 
@@ -1282,21 +1380,27 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                         <p className="timeline-description">{memory.description}</p>
                       )}
                       <div className="timeline-actions">
-                        <button onClick={() => toggleFavorite(memory._id)} className={`favorite-btn-timeline ${memory.favorite ? 'active' : ''}`}>
-                          {memory.favorite ? '♥ Đã yêu thích' : '♡ Yêu thích'}
-                        </button>
-                        <button onClick={() => handleEdit(memory)} className="edit-btn-timeline">
-                          ✏️ Sửa
-                        </button>
+                        {!readOnly && (
+                          <>
+                            <button onClick={() => toggleFavorite(memory._id)} className={`favorite-btn-timeline ${memory.favorite ? 'active' : ''}`}>
+                              {memory.favorite ? '♥ Đã yêu thích' : '♡ Yêu thích'}
+                            </button>
+                            <button onClick={() => handleEdit(memory)} className="edit-btn-timeline">
+                              ✏️ Sửa
+                            </button>
+                          </>
+                        )}
                         <button onClick={() => generateQRCode(memory)} className="qr-btn-timeline">
                           📱 QR Code
                         </button>
                         <button onClick={() => shareMemory(memory)} className="share-btn-timeline">
                           📤 Chia sẻ
                         </button>
-                        <button onClick={() => handleDelete(memory._id)} className="delete-btn-timeline">
-                          🗑️ Xóa
-                        </button>
+                        {!readOnly && (
+                          <button onClick={() => handleDelete(memory._id)} className="delete-btn-timeline">
+                            🗑️ Xóa
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

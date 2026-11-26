@@ -100,6 +100,45 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+const hasValidAdminKey = (req) => {
+  const configuredKey = process.env.ADMIN_KEY;
+  const providedKey = req.get('x-admin-key');
+  return Boolean(configuredKey && providedKey && providedKey === configuredKey);
+};
+
+app.post('/api/admin/verify', (req, res) => {
+  if (!process.env.ADMIN_KEY) {
+    res.status(503).json({ message: 'ADMIN_KEY is not configured on the server' });
+    return;
+  }
+
+  if (!hasValidAdminKey(req)) {
+    res.status(401).json({ message: 'Invalid admin key' });
+    return;
+  }
+
+  res.json({ authenticated: true });
+});
+
+app.use('/api', (req, res, next) => {
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    next();
+    return;
+  }
+
+  if (!process.env.ADMIN_KEY) {
+    res.status(503).json({ message: 'Editing is disabled until ADMIN_KEY is configured' });
+    return;
+  }
+
+  if (!hasValidAdminKey(req)) {
+    res.status(401).json({ message: 'Admin access required' });
+    return;
+  }
+
+  next();
+});
+
 app.get('/api/memories', async (req, res) => {
   try {
     const memories = await Memory.find().sort({ date: -1 });

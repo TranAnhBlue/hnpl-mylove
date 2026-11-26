@@ -3145,3 +3145,63 @@ body.dark-mode .special-qr-hint {
 .memory-card-content {
   display: contents;
 }
+/* Viewer and admin access */
+.admin-gate {
+  display: grid;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(188, 73, 116, 0.16), transparent 25rem),
+    linear-gradient(145deg, #fff8f7, #f8e6ec);
+}
+
+.admin-gate-card {
+  display: flex;
+  width: min(440px, 100%);
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 42px;
+  border: 1px solid rgba(126, 35, 69, 0.14);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #633047;
+  box-shadow: 0 28px 80px rgba(91, 24, 50, 0.14);
+}
+
+.admin-gate-card > span { display: grid; width: 54px; height: 54px; place-items: center; margin-bottom: 22px; border-radius: 50%; background: #f3dce4; color: #902f54; font-size: 1.6rem; }
+.admin-gate-card h1 { margin: 0; font: 500 2.25rem/1.12 "Times New Roman", serif; }
+.admin-gate-card > p:not(.page-eyebrow):not(.admin-gate-error) { margin: 14px 0 26px; color: #8e6a79; line-height: 1.65; }
+.admin-gate-card label { margin-bottom: 8px; font-size: 0.85rem; font-weight: 800; }
+.admin-gate-card input { min-height: 50px; box-sizing: border-box; padding: 0 15px; border: 1px solid rgba(111, 34, 63, 0.2); border-radius: 13px; outline: none; background: #fffafa; color: #54273a; font-size: 1rem; }
+.admin-gate-card input:focus { border-color: #a63b62; box-shadow: 0 0 0 3px rgba(166, 59, 98, 0.1); }
+.admin-gate-card > button { min-height: 50px; margin-top: 18px; border: 0; border-radius: 999px; background: #8f2e52; color: #fff; font-weight: 850; cursor: pointer; }
+.admin-gate-card > button:disabled { opacity: 0.55; cursor: wait; }
+.admin-gate-card > a { margin-top: 18px; color: #8a5268; font-size: 0.88rem; font-weight: 750; text-align: center; }
+.admin-gate-error { margin: 10px 0 -4px; color: #b02752; font-size: 0.84rem; line-height: 1.5; }
+
+.access-mode-bar {
+  position: relative;
+  z-index: 100;
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 0 18px;
+  background: #70213f;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+.access-mode-bar a,
+.access-mode-bar button { border: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.6); background: transparent; color: #fff; font: inherit; cursor: pointer; text-decoration: none; }
+.memory-card-view-only { cursor: default; }
+
+@media (max-width: 600px) {
+  .admin-gate-card { padding: 32px 22px; border-radius: 22px; }
+  .access-mode-bar { align-items: center; flex-direction: column; gap: 4px; padding-block: 9px; }
+}
