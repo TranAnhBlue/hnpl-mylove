@@ -649,7 +649,7 @@ function App() {
   const getGalleryImages = () => {
     return memories.filter(m => m.image).map(m => ({
       ...m,
-      imageUrl: `http://localhost:5001${m.image}`
+      imageUrl: getImageUrl(m.image)
     }));
   };
 
@@ -814,10 +814,10 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
     const specialMessage = `
 💕💕💕 THÔNG ĐIỆP YÊU THƯƠNG ĐẶC BIỆT 💕💕💕
 
-🎵 Quét mã QR này để xem slideshow ảnh đẹp với nhạc "Em Đồng Ý (I Do)" và "Ngày Đầu Tiên"!
+    🎵 Quét mã QR này để xem slideshow 170 ảnh cùng playlist kỷ niệm của chúng mình!
 
-✨ 155 khoảnh khắc đáng nhớ
-🎶 Playlist "Em Đồng Ý (I Do)" và "Ngày Đầu Tiên"
+    ✨ 170 khoảnh khắc đáng nhớ
+    🎶 "Em Đồng Ý (I Do)" · "Ngày Đầu Tiên" · "Chăm Em Một Đời"
 💝 Hiệu ứng chuyển cảnh mượt mà
 🌟 Được tạo với tất cả tình yêu
 
@@ -1289,13 +1289,13 @@ ${memory.tags && memory.tags.length > 0 ? `🏷️ ${memory.tags.join(', ')}` : 
                           ✏️ Sửa
                         </button>
                         <button onClick={() => generateQRCode(memory)} className="qr-btn-timeline">
-                          � QR Code
+                          📱 QR Code
                         </button>
                         <button onClick={() => shareMemory(memory)} className="share-btn-timeline">
-                          � Chia sẻ
+                          📤 Chia sẻ
                         </button>
                         <button onClick={() => handleDelete(memory._id)} className="delete-btn-timeline">
-                          �🗑️ Xóa
+                          🗑️ Xóa
                         </button>
                       </div>
                     </div>

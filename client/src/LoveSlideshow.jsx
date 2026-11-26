@@ -117,10 +117,18 @@ function LoveSlideshow() {
   }, [currentIndex, isFinished, isSlideshowPlaying, mode]);
 
   useEffect(() => {
-    if (!isMusicPlaying || !audioRef.current) return;
+    if (mode !== 'film' || !audioRef.current) return;
     audioRef.current.load();
     audioRef.current.play().catch(() => setIsMusicPlaying(false));
   }, [currentTrackIndex]);
+
+  useEffect(() => {
+    const upcomingImages = loveImages.slice(currentIndex + 1, currentIndex + 4);
+    upcomingImages.forEach((src) => {
+      const image = new window.Image();
+      image.src = src;
+    });
+  }, [currentIndex]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -264,7 +272,7 @@ function LoveSlideshow() {
             }
           }}
         >
-          <img src={loveImages[currentIndex]} alt={`Kỷ niệm của Đức Anh và Phương Linh, ảnh ${currentIndex + 1}`} />
+          <img src={loveImages[currentIndex]} alt={`Kỷ niệm của Đức Anh và Phương Linh, ảnh ${currentIndex + 1}`} fetchPriority="high" />
           {!isSlideshowPlaying && !isFinished && (
             <div className="playback-paused-indicator" aria-hidden="true"><span>▶</span><p>Chạm để tiếp tục</p></div>
           )}
